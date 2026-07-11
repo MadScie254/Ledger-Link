@@ -39,7 +39,7 @@ export function DashboardOwner() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Total Invoiced (MTD)
@@ -64,23 +64,50 @@ export function DashboardOwner() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Payroll Due
-          </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-slate-900">KES 1.2M</p>
-            <span className="pb-1 text-xs font-medium text-slate-400">
-              Due in 5 days
-            </span>
-          </div>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
             Cash Position
           </p>
           <div className="flex items-end gap-2">
             <p className="text-2xl font-bold text-slate-900">KES 3.1M</p>
             <span className="pb-1 text-xs font-medium text-emerald-500">
               Healthy
+            </span>
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Bookkeeping Health
+          </p>
+          <div className="flex items-end gap-3 mt-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 shrink-0">
+              <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-slate-900 leading-none">Excellent</p>
+              <span className="text-xs font-medium text-emerald-600">
+                Reconciled &middot; 0 uncategorized
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Profit Margin (YTD)
+          </p>
+          <div className="flex items-end gap-2">
+            <p className="text-2xl font-bold text-slate-900">28.4%</p>
+            <span className="pb-1 text-xs font-medium text-emerald-500">
+              +2.1% YoY
+            </span>
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Payroll Due
+          </p>
+          <div className="flex items-end gap-2">
+            <p className="text-2xl font-bold text-slate-900">KES 1.2M</p>
+            <span className="pb-1 text-xs font-medium text-slate-400">
+              Due in 5 days
             </span>
           </div>
         </div>
