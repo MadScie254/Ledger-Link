@@ -1,0 +1,6 @@
+{
+  "name": "LedgerLink",
+  "description": "A bookkeeping and back-office management system for small and mid-size organizations in Kenya.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
