@@ -4,7 +4,23 @@
  */
 
 import { AppLayout } from "@/components/layout/AppLayout";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { Onboarding } from "@/pages/Onboarding";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-export default function App() {
+function MainApp() {
+  const { isOnboarded } = useAuth();
+  if (!isOnboarded) return <Onboarding />;
   return <AppLayout />;
 }
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+}
+

@@ -7,8 +7,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
+  const { organization } = useAuth();
+  
   return (
     <header
       className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-8"
@@ -36,15 +39,13 @@ export function Header() {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="relative flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 focus:outline-none">
-              <span className="absolute right-0 top-0 h-2 w-2 rounded-full border border-white bg-amber-500"></span>
-              <span className="sr-only">View notifications</span>
-              <Bell className="h-4 w-4" aria-hidden="true" />
-            </button>
+          <DropdownMenuTrigger className="relative flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 focus:outline-none cursor-pointer">
+            <span className="absolute right-0 top-0 h-2 w-2 rounded-full border border-white bg-amber-500"></span>
+            <span className="sr-only">View notifications</span>
+            <Bell className="h-4 w-4" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Acme Kenya Ltd</DropdownMenuLabel>
+            <DropdownMenuLabel>{organization}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Switch Organization</DropdownMenuItem>
             <DropdownMenuItem>Organization Settings</DropdownMenuItem>
