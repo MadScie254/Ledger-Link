@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { useAppStore } from "@/store/useAppStore";
 
 export type Role = "owner" | "finance" | "board";
 
@@ -14,13 +15,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("owner");
-  const [organization, setOrganization] = useState("Acme Kenya Ltd");
+  const orgProfile = useAppStore((state) => state.orgProfile);
   const [isOnboarded, setIsOnboarded] = useState(false); // set to false to test onboarding
 
   const completeOnboarding = () => setIsOnboarded(true);
 
   return (
-    <AuthContext.Provider value={{ role, setRole, organization, isOnboarded, completeOnboarding }}>
+    <AuthContext.Provider value={{ role, setRole, organization: orgProfile.name, isOnboarded, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,83 @@
+import { create } from 'zustand';
+import { 
+  initialInvoices, 
+  initialStaffData, 
+  initialInventory, 
+  initialMpesaTransactions, 
+  initialBankTransactions 
+} from '@/lib/mockData';
+
+export interface OrgProfile {
+  name: string;
+  sector: string;
+  qbConnected: boolean;
+}
+
+interface AppState {
+  orgProfile: OrgProfile;
+  setOrgProfile: (profile: Partial<OrgProfile>) => void;
+  
+  invoices: typeof initialInvoices;
+  setInvoices: (invoices: typeof initialInvoices) => void;
+  updateInvoiceStatus: (id: string, status: string) => void;
+
+  staff: typeof initialStaffData;
+  setStaff: (staff: typeof initialStaffData) => void;
+
+  inventory: typeof initialInventory;
+  setInventory: (inventory: typeof initialInventory) => void;
+  updateInventoryQty: (id: string, delta: number) => void;
+
+  mpesaTransactions: typeof initialMpesaTransactions;
+  updateMpesaTransaction: (id: string, updates: Partial<typeof initialMpesaTransactions[0]>) => void;
+
+  bankTransactions: typeof initialBankTransactions;
+  updateBankTransaction: (id: string, updates: Partial<typeof initialBankTransactions[0]>) => void;
+}
+
+export const useAppStore = create<AppState>((set) => ({
+  orgProfile: {
+    name: "Acme Kenya Ltd",
+    sector: "School",
+    qbConnected: false,
+  },
+  setOrgProfile: (profile) => 
+    set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
+
+  invoices: initialInvoices,
+  setInvoices: (invoices) => set({ invoices }),
+  updateInvoiceStatus: (id, status) => 
+    set((state) => ({
+      invoices: state.invoices.map((inv) => 
+        inv.id === id ? { ...inv, status } : inv
+      )
+    })),
+
+  staff: initialStaffData,
+  setStaff: (staff) => set({ staff }),
+
+  inventory: initialInventory,
+  setInventory: (inventory) => set({ inventory }),
+  updateInventoryQty: (id, delta) => 
+    set((state) => ({
+      inventory: state.inventory.map((item) => 
+        item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
+      )
+    })),
+
+  mpesaTransactions: initialMpesaTransactions,
+  updateMpesaTransaction: (id, updates) => 
+    set((state) => ({
+      mpesaTransactions: state.mpesaTransactions.map((tx) =>
+        tx.id === id ? { ...tx, ...updates } : tx
+      )
+    })),
+
+  bankTransactions: initialBankTransactions,
+  updateBankTransaction: (id, updates) => 
+    set((state) => ({
+      bankTransactions: state.bankTransactions.map((tx) =>
+        tx.id === id ? { ...tx, ...updates } : tx
+      )
+    })),
+}));

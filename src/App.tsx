@@ -7,6 +7,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Onboarding } from "@/pages/Onboarding";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 function MainApp() {
   const { isOnboarded } = useAuth();
@@ -16,11 +18,14 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <MainApp />
-      </AuthProvider>
-    </ErrorBoundary>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ErrorBoundary>
+        <AuthProvider>
+          <MainApp />
+          <Toaster richColors position="top-right" />
+        </AuthProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 
