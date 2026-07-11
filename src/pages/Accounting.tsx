@@ -1,186 +1,185 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Check, AlertCircle } from "lucide-react";
-
-const mpesaTransactions = [
-  { id: "MP-A1B2C3", amount: 450000, sender: "John Doe", date: "Jul 10, 2026", status: "Unmatched", matchScore: "High" },
-  { id: "MP-X9Y8Z7", amount: 120000, sender: "Jane Smith", date: "Jul 05, 2026", status: "Matched", invoice: "INV-2026-004" }
-];
-
-const bankTransactions = [
-  { id: "TRX-9988", amount: 1250000, sender: "St. John's Hosp", date: "Jul 11, 2026", status: "Unmatched" },
-  { id: "TRX-9989", amount: 85000, sender: "Tech Solutions", date: "Jul 12, 2026", status: "Unmatched" }
-];
-
-const syncLogs = [
-  { id: 1, time: "Today, 09:00 AM", status: "Success", details: "12 invoices, 4 payments synced to QBO" },
-  { id: 2, time: "Yesterday, 05:30 PM", status: "Warning", details: "Failed to sync staff records (API Rate Limit)" },
-];
+import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet } from "lucide-react";
+import { useAppStore } from "@/store/useAppStore";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "sonner";
 
 export function Accounting() {
-  const [activeTab, setActiveTab] = useState<"reconciliation" | "qbo">("reconciliation");
-  const [isSyncing, setIsSyncing] = useState(false);
+  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction } = useAppStore();
+  const [activeTab, setActiveTab] = useState<"mpesa" | "bank">("mpesa");
 
-  const handleSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 2000);
+  const handleMatch = (type: "mpesa" | "bank", id: string) => {
+    if (type === "mpesa") {
+      updateMpesaTransaction(id, { status: "Matched" });
+    } else {
+      updateBankTransaction(id, { status: "Matched" });
+    }
+    toast.success("Transaction successfully matched and reconciled.");
+  };
+
+  const handleNotImplemented = (feature: string) => {
+    toast.info(`${feature} is not implemented in this demo.`);
   };
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
       <div className="flex items-end justify-between shrink-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-800">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Accounting & Reconciliation
           </h2>
-          <p className="text-sm text-slate-500">
-            Reconcile bank and M-Pesa transactions, and sync with QuickBooks.
+          <p className="text-sm text-muted-foreground">
+            Reconcile payments with bank feeds and M-Pesa statements.
           </p>
         </div>
         <div className="flex gap-3">
-          <Button 
-            onClick={() => setActiveTab("reconciliation")}
-            variant={activeTab === "reconciliation" ? "default" : "outline"}
-            className={activeTab === "reconciliation" ? "bg-indigo-600 text-white hover:bg-indigo-700 border-none" : "text-slate-700"}
-          >
-            Reconciliation
+          <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Export Reports")}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Export Reports
           </Button>
-          <Button 
-            onClick={() => setActiveTab("qbo")}
-            variant={activeTab === "qbo" ? "default" : "outline"}
-            className={activeTab === "qbo" ? "bg-indigo-600 text-white hover:bg-indigo-700 border-none" : "text-slate-700"}
-          >
-            QBO Integration
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleNotImplemented("Run Auto-Match")}>
+            <ArrowRightLeft className="mr-2 h-4 w-4" />
+            Run Auto-Match
           </Button>
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto space-y-6">
-        {activeTab === "reconciliation" && (
-          <>
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">M-Pesa Transactions</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="border-b border-slate-200 bg-slate-50 font-medium text-slate-700">
-                    <tr>
-                      <th className="p-3">Receipt No.</th>
-                      <th className="p-3">Date</th>
-                      <th className="p-3">Sender</th>
-                      <th className="p-3">Amount</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mpesaTransactions.map(tx => (
-                      <tr key={tx.id} className="hover:bg-slate-50/50">
-                        <td className="p-3 font-medium text-slate-900">{tx.id}</td>
-                        <td className="p-3">{tx.date}</td>
-                        <td className="p-3">{tx.sender}</td>
-                        <td className="p-3 font-medium">KES {tx.amount.toLocaleString()}</td>
-                        <td className="p-3">
-                          <Badge variant="secondary" className={tx.status === "Matched" ? "bg-emerald-100 text-emerald-800 border-none" : "bg-amber-100 text-amber-800 border-none"}>
-                            {tx.status}
-                          </Badge>
-                        </td>
-                        <td className="p-3 text-right">
-                          {tx.status === "Unmatched" ? (
-                            <Button variant="outline" size="sm" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
-                              Match
-                            </Button>
-                          ) : (
-                            <span className="text-xs text-slate-400">{tx.invoice}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setActiveTab("mpesa")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === "mpesa"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <Smartphone className="h-4 w-4" />
+          M-Pesa Paybill/Till
+        </button>
+        <button
+          onClick={() => setActiveTab("bank")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === "bank"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <Landmark className="h-4 w-4" />
+          Bank Feeds
+        </button>
+      </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Bank Feed (KCB Bank)</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="border-b border-slate-200 bg-slate-50 font-medium text-slate-700">
-                    <tr>
-                      <th className="p-3">Reference</th>
-                      <th className="p-3">Date</th>
-                      <th className="p-3">Description</th>
-                      <th className="p-3">Amount</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {bankTransactions.map(tx => (
-                      <tr key={tx.id} className="hover:bg-slate-50/50">
-                        <td className="p-3 font-medium text-slate-900">{tx.id}</td>
-                        <td className="p-3">{tx.date}</td>
-                        <td className="p-3">{tx.sender}</td>
-                        <td className="p-3 font-medium">KES {tx.amount.toLocaleString()}</td>
-                        <td className="p-3">
-                          <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none">
-                            {tx.status}
-                          </Badge>
-                        </td>
-                        <td className="p-3 text-right">
-                          <Button variant="outline" size="sm" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
-                            Match
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
-        )}
-
-        {activeTab === "qbo" && (
-          <div className="space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">QuickBooks Online</h3>
-                <p className="text-sm text-slate-500">Connected as Acme Kenya Ltd.</p>
-              </div>
-              <Button 
-                onClick={handleSync}
-                disabled={isSyncing}
-                className="bg-emerald-600 text-white hover:bg-emerald-700 border-none"
-              >
-                <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-                {isSyncing ? "Syncing..." : "Sync Now"}
-              </Button>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-              <h3 className="font-bold text-slate-800 mb-4">Recent Sync Logs</h3>
-              <div className="space-y-4">
-                {syncLogs.map(log => (
-                  <div key={log.id} className="flex gap-4 p-4 border border-slate-100 rounded-lg bg-slate-50">
-                    <div className="mt-0.5">
-                      {log.status === "Success" ? (
-                        <Check className="h-5 w-5 text-emerald-500" />
+      <div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col">
+        <div className="overflow-auto flex-1">
+          {activeTab === "mpesa" && (
+            <Table>
+              <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
+                <TableRow>
+                  <TableHead>Receipt No</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Sender</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Match Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mpesaTransactions.map((tx) => (
+                  <TableRow key={tx.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium text-primary">{tx.id}</TableCell>
+                    <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                    <TableCell className="font-medium text-card-foreground">{tx.sender}</TableCell>
+                    <TableCell>KES {tx.amount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      {tx.status === "Matched" ? (
+                        <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                          Matched
+                        </Badge>
                       ) : (
-                        <AlertCircle className="h-5 w-5 text-amber-500" />
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                          Unmatched
+                        </Badge>
                       )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{log.status}</p>
-                      <p className="text-xs text-slate-500">{log.details}</p>
-                      <p className="text-[10px] text-slate-400 mt-1">{log.time}</p>
-                    </div>
-                  </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {tx.status !== "Matched" && (
+                        <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleMatch("mpesa", tx.id)}>
+                          <FileCheck className="h-4 w-4 mr-1" /> Match
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            </div>
-          </div>
-        )}
+                {mpesaTransactions.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      No M-Pesa transactions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+
+          {activeTab === "bank" && (
+            <Table>
+              <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
+                <TableRow>
+                  <TableHead>Reference</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Match Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bankTransactions.map((tx) => (
+                  <TableRow key={tx.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium text-primary">{tx.id}</TableCell>
+                    <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                    <TableCell className="font-medium text-card-foreground">{tx.sender}</TableCell>
+                    <TableCell>KES {tx.amount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      {tx.status === "Matched" ? (
+                        <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                          Matched
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                          Unmatched
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {tx.status !== "Matched" && (
+                        <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleMatch("bank", tx.id)}>
+                          <FileCheck className="h-4 w-4 mr-1" /> Match
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {bankTransactions.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      No bank transactions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
       </div>
     </div>
   );
