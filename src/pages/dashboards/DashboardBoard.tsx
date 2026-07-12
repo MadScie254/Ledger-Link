@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -8,8 +9,40 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { chartData } from "@/lib/mockData";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function BoardSkeleton() {
+  return (
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
+      <div className="shrink-0">
+        <Skeleton className="h-8 w-52 mb-2" />
+        <Skeleton className="h-4 w-72" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-3">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+        ))}
+      </div>
+      <div className="flex-1 rounded-xl border border-border bg-card p-8 shadow-sm">
+        <Skeleton className="h-6 w-64 mb-8" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    </div>
+  );
+}
 
 export function DashboardBoard() {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (isLoading) return <BoardSkeleton />;
+
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
       <div className="flex items-end justify-between shrink-0">
@@ -89,3 +122,4 @@ export function DashboardBoard() {
     </div>
   );
 }
+

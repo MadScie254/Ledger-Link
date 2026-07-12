@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -10,21 +11,207 @@ import {
 import { chartData } from "@/lib/mockData";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppStore } from "@/store/useAppStore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Shield } from "lucide-react";
 
-const recentActivity = [
-  { id: 1, type: "Invoice Paid", client: "Nairobi Academy", amount: "KES 450,000", time: "2 hours ago" },
-  { id: 2, type: "Expense Logged", client: "Office Supplies", amount: "KES 12,500", time: "4 hours ago" },
-  { id: 3, type: "Payroll Approved", client: "July 2026", amount: "KES 1,200,000", time: "1 day ago" },
-  { id: 4, type: "Invoice Sent", client: "Tech Solutions Ltd", amount: "KES 85,000", time: "1 day ago" },
-];
+// ---------- helpers ----------
+
+function formatKES(value: number): string {
+  if (value >= 1_000_000) return `KES ${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `KES ${(value / 1_000).toFixed(0)}K`;
+  return `KES ${value.toLocaleString()}`;
+}
+
+interface SectorConfig {
+  invoicedLabel: string;
+  arrearsLabel: string;
+  complianceText: string;
+  extraCards: { label: string; value: string; highlight?: boolean }[];
+}
+
+function getSectorConfig(sector: string): SectorConfig {
+  switch (sector) {
+    case "School":
+      return {
+        invoicedLabel: "Total Invoiced (MTD)",
+        arrearsLabel: "Unpaid School Fees",
+        complianceText: "Term fee collection deadline in 3 days — follow up with parents who have outstanding balances",
+        extraCards: [],
+      };
+    case "Church":
+      return {
+        invoicedLabel: "Offerings & Pledges (MTD)",
+        arrearsLabel: "Outstanding Pledges",
+        complianceText: "Annual financial statement filing deadline approaching — ensure all offerings are reconciled",
+        extraCards: [
+          { label: "Trust/Building Fund Balance", value: "KES 1.8M" },
+        ],
+      };
+    case "Law Firm":
+      return {
+        invoicedLabel: "Total Billed (MTD)",
+        arrearsLabel: "Outstanding Arrears",
+        complianceText: "LSK annual practising certificate renewal due — ensure compliance filings are current",
+        extraCards: [
+          { label: "Client Trust Account", value: "KES 5.2M", highlight: true },
+        ],
+      };
+    case "Hospital / Clinic":
+      return {
+        invoicedLabel: "Patient Billing (MTD)",
+        arrearsLabel: "Outstanding Arrears",
+        complianceText: "NHIF remittance deadline in 3 days — ensure all claims are submitted",
+        extraCards: [],
+      };
+    default:
+      return {
+        invoicedLabel: "Total Invoiced (MTD)",
+        arrearsLabel: "Outstanding Arrears",
+        complianceText: "PAYE and NSSF Filing Deadline in 3 days (15th July)",
+        extraCards: [],
+      };
+  }
+}
+
+// ---------- skeleton ----------
+
+function DashboardSkeleton() {
+  return (
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
+      <div className="shrink-0">
+        <Skeleton className="h-8 w-60 mb-2" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        ))}
+      </div>
+      <div className="grid flex-1 grid-cols-1 gap-6 min-h-0 lg:grid-cols-3">
+        <div className="col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <Skeleton className="h-5 w-48 mb-6" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+          <Skeleton className="h-5 w-32 mb-2" />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-3 pb-4 border-b border-border last:border-0">
+              <Skeleton className="h-8 w-8 rounded shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Skeleton className="h-14 w-full rounded-xl shrink-0" />
+    </div>
+  );
+}
+
+// ---------- component ----------
 
 export function DashboardOwner() {
   const { role } = useAuth();
   const isFinance = role === "finance";
 
+  const invoices = useAppStore((s) => s.invoices);
+  const staff = useAppStore((s) => s.staff);
+  const inventory = useAppStore((s) => s.inventory);
+  const sector = useAppStore((s) => s.orgProfile.sector);
+
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // ---------- derived KPIs ----------
+
+  const totalInvoicedMTD = useMemo(() => {
+    const now = new Date();
+    return invoices
+      .filter((inv) => {
+        const d = new Date(inv.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, inv) => sum + inv.rawAmount, 0);
+  }, [invoices]);
+
+  const outstandingArrears = useMemo(() => {
+    return invoices
+      .filter((inv) => inv.status === "Overdue" || inv.status === "Pending")
+      .reduce((sum, inv) => sum + inv.rawAmount, 0);
+  }, [invoices]);
+
+  const overdueCount = useMemo(
+    () => invoices.filter((inv) => inv.status === "Overdue").length,
+    [invoices]
+  );
+
+  const totalPayrollDue = useMemo(
+    () => staff.filter((s) => s.status === "Active").reduce((sum, s) => sum + s.gross, 0),
+    [staff]
+  );
+
+  const lowStockCount = useMemo(
+    () => inventory.filter((item) => item.qty < item.minQty).length,
+    [inventory]
+  );
+
+  // ---------- recent activity (derived) ----------
+
+  const recentActivity = useMemo(() => {
+    const items: { id: string; type: string; client: string; amount: string; time: string }[] = [];
+
+    invoices.forEach((inv) => {
+      if (inv.status === "Paid") {
+        items.push({
+          id: inv.id,
+          type: "Invoice Paid",
+          client: inv.client,
+          amount: `KES ${inv.amount}`,
+          time: inv.date,
+        });
+      } else if (inv.status === "Pending") {
+        items.push({
+          id: inv.id,
+          type: "Invoice Sent",
+          client: inv.client,
+          amount: `KES ${inv.amount}`,
+          time: inv.date,
+        });
+      } else if (inv.status === "Overdue") {
+        items.push({
+          id: inv.id,
+          type: "Invoice Overdue",
+          client: inv.client,
+          amount: `KES ${inv.amount}`,
+          time: inv.date,
+        });
+      }
+    });
+
+    // Sort newest first (simple string sort works for "Mon DD, YYYY" format)
+    items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+    return items.slice(0, 5);
+  }, [invoices]);
+
+  // ---------- sector config ----------
+
+  const cfg = useMemo(() => getSectorConfig(sector), [sector]);
+
   const handleNotImplemented = (feature: string) => {
     toast.info(`${feature} is not implemented in this demo.`);
   };
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
@@ -42,24 +229,23 @@ export function DashboardOwner() {
       <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Total Invoiced (MTD)
+            {cfg.invoicedLabel}
           </p>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">KES 2.4M</p>
-            <span className="pb-1 text-xs font-medium text-emerald-500 dark:text-emerald-400">
-              +14% from last month
-            </span>
+            <p className="text-2xl font-bold text-card-foreground">{formatKES(totalInvoicedMTD)}</p>
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Outstanding Arrears
+            {cfg.arrearsLabel}
           </p>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">KES 850K</p>
-            <span className="pb-1 text-xs font-medium text-amber-500 dark:text-amber-400">
-              3 invoices over 60 days
-            </span>
+            <p className="text-2xl font-bold text-card-foreground">{formatKES(outstandingArrears)}</p>
+            {overdueCount > 0 && (
+              <span className="pb-1 text-xs font-medium text-amber-500 dark:text-amber-400">
+                {overdueCount} invoice{overdueCount > 1 ? "s" : ""} overdue
+              </span>
+            )}
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
@@ -91,26 +277,55 @@ export function DashboardOwner() {
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Profit Margin (YTD)
+            Payroll Due
           </p>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">28.4%</p>
-            <span className="pb-1 text-xs font-medium text-emerald-500 dark:text-emerald-400">
-              +2.1% YoY
+            <p className="text-2xl font-bold text-card-foreground">{formatKES(totalPayrollDue)}</p>
+            <span className="pb-1 text-xs font-medium text-muted-foreground">
+              {staff.filter((s) => s.status === "Active").length} active staff
             </span>
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Payroll Due
+            Inventory Alerts
           </p>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">KES 1.2M</p>
-            <span className="pb-1 text-xs font-medium text-muted-foreground">
-              Due in 5 days
+            <p className="text-2xl font-bold text-card-foreground">{lowStockCount}</p>
+            <span className={`pb-1 text-xs font-medium ${lowStockCount > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+              {lowStockCount > 0 ? 'items below min stock' : 'All stocked'}
             </span>
           </div>
         </div>
+
+        {/* Sector-specific extra cards */}
+        {cfg.extraCards.map((card) => (
+          <div
+            key={card.label}
+            className={`rounded-xl border bg-card p-5 shadow-sm ${
+              card.highlight
+                ? 'border-amber-400 dark:border-amber-600 ring-1 ring-amber-400/30'
+                : 'border-border'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              {card.highlight && (
+                <Shield className="h-4 w-4 text-amber-500 shrink-0" />
+              )}
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {card.label}
+              </p>
+            </div>
+            <div className="flex items-end gap-2">
+              <p className="text-2xl font-bold text-card-foreground">{card.value}</p>
+              {card.highlight && (
+                <span className="pb-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  Segregated
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-6 min-h-0 lg:grid-cols-3">
@@ -153,6 +368,9 @@ export function DashboardOwner() {
             Recent Activity
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto">
+            {recentActivity.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">No recent activity.</p>
+            )}
             {recentActivity.map((activity, index) => {
               const isLast = index === recentActivity.length - 1;
               let initials = "LG";
@@ -160,12 +378,9 @@ export function DashboardOwner() {
               if (activity.type.includes("Invoice Paid")) {
                 initials = "MP";
                 colorClass = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-              } else if (activity.type.includes("Expense")) {
-                initials = "EX";
-                colorClass = "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-              } else if (activity.type.includes("Payroll")) {
-                initials = "PY";
-                colorClass = "bg-primary/20 text-primary";
+              } else if (activity.type.includes("Overdue")) {
+                initials = "OD";
+                colorClass = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
               } else if (activity.type.includes("Invoice Sent")) {
                 initials = "IS";
                 colorClass = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
@@ -201,7 +416,7 @@ export function DashboardOwner() {
             <p className="text-sm font-medium">Compliance Alert</p>
           </div>
           <div className="h-4 w-px bg-primary-foreground/20"></div>
-          <p className="text-sm text-primary-foreground/90">PAYE and NSSF Filing Deadline in <span className="font-bold text-primary-foreground uppercase">3 days</span> (15th July)</p>
+          <p className="text-sm text-primary-foreground/90">{cfg.complianceText}</p>
         </div>
         <button onClick={() => handleNotImplemented("View Calendar")} className="px-4 py-1.5 bg-background text-primary rounded-lg text-xs font-bold hover:bg-muted transition-colors">
           View Calendar
