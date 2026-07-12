@@ -4,7 +4,6 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Dashboard } from "@/pages/Dashboard";
 import { Clients } from "@/pages/Clients";
-import { Clients } from "@/pages/Clients";
 import { Invoicing } from "@/pages/Invoicing";
 import { Payroll } from "@/pages/Payroll";
 import { Inventory } from "@/pages/Inventory";
