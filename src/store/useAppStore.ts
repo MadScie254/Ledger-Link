@@ -14,6 +14,24 @@ export interface OrgProfile {
   qbConnected: boolean;
 }
 
+export interface MovementLogEntry {
+  id: string;
+  itemId: string;
+  itemName: string;
+  delta: number;
+  reason: string;
+  timestamp: string;
+}
+
+export interface PayrollHistoryEntry {
+  id: string;
+  period: string;
+  totalGross: number;
+  totalNet: number;
+  employeeCount: number;
+  disbursedAt: string;
+}
+
 interface AppState {
   orgProfile: OrgProfile;
   setOrgProfile: (profile: Partial<OrgProfile>) => void;
@@ -28,6 +46,12 @@ interface AppState {
   inventory: typeof initialInventory;
   setInventory: (inventory: typeof initialInventory) => void;
   updateInventoryQty: (id: string, delta: number) => void;
+  
+  movements: MovementLogEntry[];
+  addMovement: (movement: Omit<MovementLogEntry, 'id' | 'timestamp'>) => void;
+
+  payrollHistory: PayrollHistoryEntry[];
+  disbursePayroll: (entry: Omit<PayrollHistoryEntry, 'id' | 'disbursedAt'>) => void;
 
   mpesaTransactions: typeof initialMpesaTransactions;
   updateMpesaTransaction: (id: string, updates: Partial<typeof initialMpesaTransactions[0]>) => void;
@@ -66,6 +90,32 @@ export const useAppStore = create<AppState>()(
           inventory: state.inventory.map((item) => 
             item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
           )
+        })),
+
+      movements: [],
+      addMovement: (movement) => 
+        set((state) => ({
+          movements: [
+            {
+              ...movement,
+              id: Math.random().toString(36).substring(2, 9),
+              timestamp: new Date().toISOString(),
+            },
+            ...state.movements,
+          ]
+        })),
+
+      payrollHistory: [],
+      disbursePayroll: (entry) => 
+        set((state) => ({
+          payrollHistory: [
+            {
+              ...entry,
+              id: Math.random().toString(36).substring(2, 9),
+              disbursedAt: new Date().toISOString(),
+            },
+            ...state.payrollHistory,
+          ]
         })),
 
       mpesaTransactions: initialMpesaTransactions,
