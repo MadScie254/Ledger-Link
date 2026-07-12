@@ -1,3 +1,4 @@
+import React from "react";
 import { Bell, Search, Moon, Sun, User, ChevronRight, Menu } from "lucide-react";
 import {
   DropdownMenu,

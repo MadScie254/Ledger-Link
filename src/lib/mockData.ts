@@ -119,7 +119,7 @@ export const initialInventory = [
 
 export const initialMpesaTransactions = [
   { id: "MP-A1B2C3", amount: 450000, sender: "John Doe", date: "Jul 10, 2026", status: "Unmatched", matchScore: "High", invoice: undefined },
-  { id: "MP-X9Y8Z7", amount: 120000, sender: "Jane Smith", date: "Jul 05, 2026", status: "Matched", invoice: "INV-2026-004" }
+  { id: "MP-X9Y8Z7", amount: 120000, sender: "Jane Smith", date: "Jul 05, 2026", status: "Matched", matchScore: undefined, invoice: "INV-2026-004" }
 ];
 
 export const initialBankTransactions = [
