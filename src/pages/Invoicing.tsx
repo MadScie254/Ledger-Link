@@ -8,11 +8,28 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, MoreHorizontal, ArrowUpDown, Smartphone } from "lucide-react";
+import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, type Invoice, type InvoiceLineItem } from "@/store/useAppStore";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { generateInvoicePdf } from "@/lib/generateInvoicePdf";
 
 type SortField = "id" | "client" | "rawAmount" | "status" | "date" | "dueDate";
 type SortOrder = "asc" | "desc";
@@ -53,13 +70,304 @@ function InvoicingSkeleton() {
   );
 }
 
+// ---------- New Invoice Form ----------
+
+const emptyLineItem: InvoiceLineItem = { description: "", qty: 1, unitPrice: 0 };
+
+function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { addInvoice } = useAppStore();
+
+  const [client, setClient] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientAddress, setClientAddress] = useState("");
+  const [issueDate, setIssueDate] = useState(new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState("");
+  const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([{ ...emptyLineItem }]);
+  const [taxRate, setTaxRate] = useState(16);
+  const [notes, setNotes] = useState("");
+
+  const subtotal = lineItems.reduce((sum, li) => sum + li.qty * li.unitPrice, 0);
+  const tax = subtotal * (taxRate / 100);
+  const total = subtotal + tax;
+
+  const updateLine = (index: number, field: keyof InvoiceLineItem, value: string | number) => {
+    setLineItems((prev) => prev.map((li, i) => (i === index ? { ...li, [field]: value } : li)));
+  };
+
+  const removeLine = (index: number) => {
+    if (lineItems.length <= 1) return;
+    setLineItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    if (!client.trim()) { toast.error("Client name is required."); return; }
+    if (lineItems.some(li => !li.description.trim() || li.unitPrice <= 0)) { toast.error("Fill in all line items."); return; }
+    if (!dueDate) { toast.error("Due date is required."); return; }
+
+    const formatted = new Date(issueDate).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const formattedDue = new Date(dueDate).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+
+    addInvoice({
+      client,
+      clientEmail,
+      clientPhone,
+      clientAddress,
+      date: formatted,
+      dueDate: formattedDue,
+      lineItems,
+      taxRate,
+      notes,
+    });
+
+    toast.success("Invoice created successfully.");
+    onOpenChange(false);
+    // Reset
+    setClient(""); setClientEmail(""); setClientPhone(""); setClientAddress("");
+    setLineItems([{ ...emptyLineItem }]); setNotes(""); setDueDate("");
+  };
+
+  const inputCls = "w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>New Invoice</DialogTitle>
+          <DialogDescription>Create a new invoice for a client.</DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-auto space-y-5 pr-1">
+          {/* Client Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Client Name *</label>
+              <input className={inputCls} value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. Nairobi Academy" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
+              <input className={inputCls} value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="finance@client.co.ke" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Phone</label>
+              <input className={inputCls} value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} placeholder="+254 7XX XXX XXX" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Address</label>
+              <input className={inputCls} value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="P.O. Box 12345, Nairobi" />
+            </div>
+          </div>
+
+          {/* Dates */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Issue Date *</label>
+              <input className={inputCls} type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Due Date *</label>
+              <input className={inputCls} type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            </div>
+          </div>
+
+          {/* Line Items */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-2 block">Line Items</label>
+            <div className="space-y-2">
+              {lineItems.map((li, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input className={`${inputCls} flex-1`} placeholder="Description" value={li.description} onChange={(e) => updateLine(i, "description", e.target.value)} />
+                  <input className={`${inputCls} w-16 text-center`} type="number" min={1} value={li.qty} onChange={(e) => updateLine(i, "qty", parseInt(e.target.value) || 1)} />
+                  <input className={`${inputCls} w-28`} type="number" min={0} placeholder="Unit Price" value={li.unitPrice || ""} onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)} />
+                  <span className="text-sm font-medium text-muted-foreground w-28 text-right">KES {(li.qty * li.unitPrice).toLocaleString()}</span>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive shrink-0" onClick={() => removeLine(i)} disabled={lineItems.length <= 1}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => setLineItems([...lineItems, { ...emptyLineItem }])}>
+              <Plus className="mr-1 h-3 w-3" /> Add Line
+            </Button>
+          </div>
+
+          {/* Tax & Notes */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">VAT Rate (%)</label>
+              <input className={`${inputCls} w-24`} type="number" min={0} max={100} value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)} />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Notes / Terms</label>
+            <textarea className={`${inputCls} min-h-[60px]`} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment terms or a thank-you note..." />
+          </div>
+
+          {/* Totals */}
+          <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Subtotal</span><span>KES {subtotal.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Tax ({taxRate}%)</span><span>KES {tax.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold text-foreground pt-1 border-t border-border">
+              <span>Grand Total</span><span>KES {total.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-border shrink-0">
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button onClick={handleSubmit}>Create Invoice</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Invoice Detail View ----------
+
+function InvoiceDetailDialog({ invoice, open, onOpenChange }: { invoice: Invoice | null; open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { orgProfile } = useAppStore();
+  if (!invoice) return null;
+
+  const subtotal = invoice.lineItems?.reduce((sum, li) => sum + li.qty * li.unitPrice, 0) || 0;
+  const tax = subtotal * ((invoice.taxRate || 0) / 100);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            Invoice {invoice.id}
+            <Badge
+              variant={invoice.status === "Paid" ? "default" : invoice.status === "Overdue" ? "destructive" : "secondary"}
+              className={
+                invoice.status === "Paid"
+                  ? "bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300"
+                  : invoice.status === "Pending"
+                  ? "bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300"
+                  : "bg-destructive/10 text-destructive border-none"
+              }
+            >
+              {invoice.status}
+            </Badge>
+          </DialogTitle>
+          <DialogDescription>Professional invoice document view.</DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-auto space-y-5">
+          {/* Letterhead */}
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold text-emerald-600">{orgProfile.name}</h3>
+              <p className="text-xs text-muted-foreground">{orgProfile.sector}</p>
+            </div>
+            <div className="text-right text-sm text-muted-foreground">
+              <p>Invoice #: <strong className="text-foreground">{invoice.id}</strong></p>
+              <p>Issued: {invoice.date}</p>
+              <p>Due: {invoice.dueDate}</p>
+            </div>
+          </div>
+
+          {/* Bill To */}
+          <div className="bg-muted/40 rounded-lg p-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Bill To</p>
+            <p className="font-medium text-foreground">{invoice.client}</p>
+            {invoice.clientAddress && <p className="text-sm text-muted-foreground">{invoice.clientAddress}</p>}
+            {invoice.clientEmail && <p className="text-sm text-muted-foreground">{invoice.clientEmail}</p>}
+            {invoice.clientPhone && <p className="text-sm text-muted-foreground">{invoice.clientPhone}</p>}
+          </div>
+
+          {/* Line Items Table */}
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-center">Qty</TableHead>
+                <TableHead className="text-right">Unit Price</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invoice.lineItems?.map((li, i) => (
+                <TableRow key={i}>
+                  <TableCell>{li.description}</TableCell>
+                  <TableCell className="text-center">{li.qty}</TableCell>
+                  <TableCell className="text-right">KES {li.unitPrice.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-medium">KES {(li.qty * li.unitPrice).toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {/* Totals */}
+          <div className="flex justify-end">
+            <div className="w-64 space-y-1">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Subtotal</span><span>KES {subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Tax ({invoice.taxRate}%)</span><span>KES {tax.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm font-bold text-foreground pt-1 border-t border-border">
+                <span>Total</span><span>KES {invoice.amount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {invoice.notes && (
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">Notes / Terms</p>
+              <p className="text-sm text-muted-foreground">{invoice.notes}</p>
+            </div>
+          )}
+
+          {/* Reminders Trail */}
+          {invoice.reminders && invoice.reminders.length > 0 && (
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Reminder History</p>
+              <div className="space-y-2">
+                {invoice.reminders.map((r, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {r.method === "Email" ? <Mail className="h-3.5 w-3.5" /> : <MessageSquare className="h-3.5 w-3.5" />}
+                    <span>{r.method} reminder sent</span>
+                    <span className="ml-auto text-xs">{new Date(r.sentAt).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-border shrink-0">
+          <DialogClose asChild>
+            <Button variant="outline">Close</Button>
+          </DialogClose>
+          <Button onClick={() => generateInvoicePdf(invoice, orgProfile)}>
+            <FileDown className="mr-2 h-4 w-4" /> Download PDF
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Main Component ----------
+
 export function Invoicing() {
-  const { invoices } = useAppStore();
+  const { invoices, updateInvoiceStatus, addReminder, orgProfile } = useAppStore();
   const [filter, setFilter] = useState("All");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Dialog states
+  const [newInvoiceOpen, setNewInvoiceOpen] = useState(false);
+  const [detailInvoice, setDetailInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
@@ -81,7 +389,6 @@ export function Invoicing() {
 
     try {
       setIsProcessing(invoiceId);
-      // Mock delay
       await new Promise(r => setTimeout(r, 1000));
       toast.success(`M-Pesa payment request sent to ${phone}`);
     } catch (e) {
@@ -91,8 +398,30 @@ export function Invoicing() {
     }
   };
 
-  const handleNotImplemented = (feature: string) => {
-    toast.info(`${feature} is not implemented in this demo.`);
+  const handleExportCsv = () => {
+    const headers = ["Invoice ID", "Client", "Amount (KES)", "Status", "Date", "Due Date"];
+    const rows = filteredAndSortedInvoices.map((inv) =>
+      [inv.id, inv.client, inv.rawAmount, inv.status, inv.date, inv.dueDate].join(",")
+    );
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoices-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Invoices exported to CSV.");
+  };
+
+  const handleSendReminder = (invoice: Invoice) => {
+    addReminder(invoice.id, "Email");
+    toast.success(`Reminder sent to ${invoice.clientEmail || invoice.client}.`);
+  };
+
+  const handleMarkAsPaid = (invoiceId: string) => {
+    updateInvoiceStatus(invoiceId, "Paid");
+    toast.success("Invoice marked as paid.");
   };
 
   const filteredAndSortedInvoices = useMemo(() => {
@@ -128,11 +457,11 @@ export function Invoicing() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Export")}>
+          <Button variant="outline" className="text-foreground" onClick={handleExportCsv}>
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleNotImplemented("Create Invoice")}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setNewInvoiceOpen(true)}>
             New Invoice
           </Button>
         </div>
@@ -183,7 +512,7 @@ export function Invoicing() {
             <TableBody>
               {filteredAndSortedInvoices.map((invoice) => (
                 <TableRow key={invoice.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium text-primary">
+                  <TableCell className="font-medium text-primary cursor-pointer hover:underline" onClick={() => setDetailInvoice(invoice)}>
                     {invoice.id}
                   </TableCell>
                   <TableCell className="font-medium text-card-foreground">{invoice.client}</TableCell>
@@ -223,9 +552,29 @@ export function Invoicing() {
                         {isProcessing === invoice.id ? 'Sending...' : 'Request M-Pesa'}
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" onClick={() => handleNotImplemented("More Options")}>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" side="bottom" sideOffset={4}>
+                        <DropdownMenuItem onClick={() => setDetailInvoice(invoice)}>
+                          <Eye className="mr-2 h-4 w-4" /> View Invoice
+                        </DropdownMenuItem>
+                        {(invoice.status === "Pending" || invoice.status === "Overdue") && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleSendReminder(invoice)}>
+                              <Bell className="mr-2 h-4 w-4" /> Send Reminder
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice.id)}>
+                              <CheckCircle2 className="mr-2 h-4 w-4" /> Mark as Paid
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -240,6 +589,10 @@ export function Invoicing() {
           </Table>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <NewInvoiceDialog open={newInvoiceOpen} onOpenChange={setNewInvoiceOpen} />
+      <InvoiceDetailDialog invoice={detailInvoice} open={!!detailInvoice} onOpenChange={(v) => { if (!v) setDetailInvoice(null); }} />
     </div>
   );
 }
