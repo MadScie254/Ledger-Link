@@ -64,11 +64,15 @@ function PayrollSkeleton() {
 }
 
 export function Payroll() {
-  const { staff } = useAppStore();
+  const { staff, payrollHistory, disbursePayroll } = useAppStore();
   const [activeTab, setActiveTab] = useState<"directory" | "run">("directory");
   const [payrollRun, setPayrollRun] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const currentPeriod = "July 2026";
+  const disbursedEntry = payrollHistory.find(p => p.period === currentPeriod);
+  const isDisbursed = !!disbursedEntry;
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
@@ -92,7 +96,22 @@ export function Payroll() {
   }, [staff, searchQuery]);
 
   const handleApproveDisburse = () => {
-    toast.success("Payroll approved and disbursements initiated (Mocked).");
+    const activeStaff = staff.filter(s => s.status === 'Active');
+    let totalGross = 0;
+    let totalNet = 0;
+    
+    activeStaff.forEach(s => {
+      totalGross += s.gross;
+      totalNet += calculateDeductions(s.gross).net;
+    });
+
+    disbursePayroll({
+      period: currentPeriod,
+      totalGross,
+      totalNet,
+      employeeCount: activeStaff.length,
+    });
+    toast.success(`Payroll for ${currentPeriod} approved and disbursements initiated.`);
   };
 
   const handleNotImplemented = (feature: string) => {

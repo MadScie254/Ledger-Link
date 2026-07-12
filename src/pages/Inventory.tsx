@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, AlertTriangle, ArrowRightLeft, Search } from "lucide-react";
+import { Plus, Minus, AlertTriangle, ArrowRightLeft, Search, Check, X } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
   Table,
@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 function InventorySkeleton() {
   return (
@@ -56,9 +64,14 @@ function InventorySkeleton() {
 }
 
 export function Inventory() {
-  const { inventory, updateInventoryQty } = useAppStore();
+  const { inventory, updateInventoryQty, movements, addMovement } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Inline adjust state
+  const [adjustingItemId, setAdjustingItemId] = useState<string | null>(null);
+  const [adjustingDelta, setAdjustingDelta] = useState<number>(0);
+  const [adjustingReason, setAdjustingReason] = useState<string>("Restock");
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
@@ -77,6 +90,28 @@ export function Inventory() {
     toast.info(`${feature} is not implemented in this demo.`);
   };
 
+  const startAdjust = (id: string, delta: number) => {
+    setAdjustingItemId(id);
+    setAdjustingDelta(delta);
+    setAdjustingReason(delta > 0 ? "Restock" : "Sale/Usage");
+  };
+
+  const confirmAdjust = (item: typeof inventory[0]) => {
+    addMovement({
+      itemId: item.id,
+      itemName: item.name,
+      delta: adjustingDelta,
+      reason: adjustingReason,
+    });
+    updateInventoryQty(item.id, adjustingDelta);
+    setAdjustingItemId(null);
+    toast.success(`Inventory updated: ${item.name} (${adjustingDelta > 0 ? '+' : ''}${adjustingDelta})`);
+  };
+
+  const cancelAdjust = () => {
+    setAdjustingItemId(null);
+  };
+
   if (isLoading) return <InventorySkeleton />;
 
   return (
@@ -91,10 +126,58 @@ export function Inventory() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Movement Log")}>
-            <ArrowRightLeft className="mr-2 h-4 w-4" />
-            Movement Log
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="text-foreground">
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                Movement Log
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Inventory Movement Log</DialogTitle>
+                <DialogDescription>
+                  History of all stock adjustments across your inventory.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-auto border rounded-md mt-4">
+                <Table>
+                  <TableHeader className="bg-muted/50 sticky top-0">
+                    <TableRow>
+                      <TableHead>When</TableHead>
+                      <TableHead>Item</TableHead>
+                      <TableHead>Change</TableHead>
+                      <TableHead>Reason</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {movements.length > 0 ? (
+                      movements.map(m => (
+                        <TableRow key={m.id}>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {new Date(m.timestamp).toLocaleString()}
+                          </TableCell>
+                          <TableCell className="font-medium">{m.itemName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={m.delta > 0 ? "text-emerald-600 bg-emerald-50" : "text-amber-600 bg-amber-50"}>
+                              {m.delta > 0 ? '+' : ''}{m.delta}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{m.reason}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No movements recorded yet.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 border-none" onClick={() => handleNotImplemented("Add Item")}>
             <Plus className="mr-2 h-4 w-4" />
             Add Item
@@ -155,6 +238,8 @@ export function Inventory() {
             <TableBody>
               {filteredInventory.map(item => {
                 const isLowStock = item.qty <= item.minQty;
+                const isAdjusting = adjustingItemId === item.id;
+
                 return (
                   <TableRow key={item.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium text-primary">{item.id}</TableCell>
@@ -176,14 +261,36 @@ export function Inventory() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="icon" className="h-7 w-7 border-border hover:bg-muted" onClick={() => updateInventoryQty(item.id, -1)}>
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="h-7 w-7 border-border hover:bg-muted" onClick={() => updateInventoryQty(item.id, 1)}>
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      {isAdjusting ? (
+                        <div className="flex items-center justify-end gap-2 animate-in fade-in slide-in-from-right-4">
+                          <span className="font-bold text-sm">{adjustingDelta > 0 ? '+' : ''}{adjustingDelta}</span>
+                          <select 
+                            value={adjustingReason} 
+                            onChange={(e) => setAdjustingReason(e.target.value)}
+                            className="h-7 text-xs border rounded bg-background"
+                          >
+                            <option value="Restock">Restock</option>
+                            <option value="Sale/Usage">Sale/Usage</option>
+                            <option value="Correction">Correction</option>
+                            <option value="Damaged/Expired">Damaged/Expired</option>
+                          </select>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100" onClick={() => confirmAdjust(item)}>
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={cancelAdjust}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="outline" size="icon" className="h-7 w-7 border-border hover:bg-muted" onClick={() => startAdjust(item.id, -1)}>
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <Button variant="outline" size="icon" className="h-7 w-7 border-border hover:bg-muted" onClick={() => startAdjust(item.id, 1)}>
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
