@@ -13,7 +13,186 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield } from "lucide-react";
+import { Shield, ChevronLeft, ChevronRight, MapPin, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+
+// ---------- Calendar Types ----------
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  type: "invoice-due" | "payroll" | "compliance" | "custom";
+  color: string;
+}
+
+function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenChange: (v: boolean) => void; events: CalendarEvent[] }) {
+  const [viewDate, setViewDate] = useState(new Date(2026, 6, 1)); // July 2026
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [customEvents, setCustomEvents] = useState<CalendarEvent[]>([]);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+
+  const allEvents = [...events, ...customEvents];
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const days: (number | null)[] = [];
+  for (let i = 0; i < firstDayOfMonth; i++) days.push(null);
+  for (let d = 1; d <= daysInMonth; d++) days.push(d);
+
+  const getDateKey = (day: number) => `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+  const eventsForDate = (day: number) => allEvents.filter(e => e.date === getDateKey(day));
+  const selectedEvents = selectedDate ? allEvents.filter(e => e.date === selectedDate) : [];
+
+  const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  const handleAddEvent = () => {
+    if (!newEventTitle.trim() || !selectedDate) return;
+    setCustomEvents(prev => [...prev, {
+      id: Math.random().toString(36).substring(2, 9),
+      title: newEventTitle.trim(),
+      date: selectedDate,
+      type: "custom",
+      color: "bg-violet-500"
+    }]);
+    setNewEventTitle("");
+    setShowAddEvent(false);
+    toast.success("Event added.");
+  };
+
+  const removeCustomEvent = (id: string) => {
+    setCustomEvents(prev => prev.filter(e => e.id !== id));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Calendar</DialogTitle>
+          <DialogDescription>Track invoice due dates, payroll runs, and compliance deadlines.</DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-auto">
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="h-4 w-4" /></Button>
+            <h3 className="text-lg font-bold text-foreground">{monthName}</h3>
+            <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="h-4 w-4" /></Button>
+          </div>
+
+          {/* Weekday headers */}
+          <div className="grid grid-cols-7 gap-px mb-1">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
+              <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1">{d}</div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-px border border-border rounded-lg overflow-hidden">
+            {days.map((day, i) => {
+              if (day === null) return <div key={`empty-${i}`} className="h-20 bg-muted/30" />;
+              const dateKey = getDateKey(day);
+              const dayEvents = eventsForDate(day);
+              const isToday = dateKey === todayKey;
+              const isSelected = dateKey === selectedDate;
+
+              return (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDate(dateKey)}
+                  className={`h-20 p-1 text-left bg-card hover:bg-muted/50 transition-colors relative flex flex-col ${
+                    isSelected ? "ring-2 ring-primary ring-inset" : ""
+                  }`}
+                >
+                  <span className={`text-xs font-medium inline-flex items-center justify-center w-5 h-5 rounded-full ${
+                    isToday ? "bg-primary text-primary-foreground" : "text-foreground"
+                  }`}>{day}</span>
+                  <div className="flex flex-wrap gap-0.5 mt-0.5">
+                    {dayEvents.slice(0, 3).map(e => (
+                      <span key={e.id} className={`w-full text-[9px] leading-tight truncate px-1 py-0.5 rounded ${e.color} text-white`}>{e.title}</span>
+                    ))}
+                    {dayEvents.length > 3 && <span className="text-[9px] text-muted-foreground">+{dayEvents.length - 3}</span>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selected date detail */}
+          {selectedDate && (
+            <div className="mt-4 border-t border-border pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-foreground">
+                  Events for {new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                </h4>
+                <Button variant="outline" size="sm" onClick={() => setShowAddEvent(true)}>
+                  <Plus className="mr-1 h-3 w-3" /> Add Event
+                </Button>
+              </div>
+
+              {showAddEvent && (
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    className="flex-1 rounded-md border border-input bg-background py-1.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Event title..."
+                    value={newEventTitle}
+                    onChange={e => setNewEventTitle(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleAddEvent()}
+                  />
+                  <Button size="sm" onClick={handleAddEvent}>Add</Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowAddEvent(false)}><X className="h-3 w-3" /></Button>
+                </div>
+              )}
+
+              {selectedEvents.length > 0 ? (
+                <div className="space-y-2">
+                  {selectedEvents.map(e => (
+                    <div key={e.id} className="flex items-center gap-2 text-sm">
+                      <span className={`w-2.5 h-2.5 rounded-full ${e.color} shrink-0`} />
+                      <span className="flex-1">{e.title}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{e.type.replace("-", " ")}</span>
+                      {e.type === "custom" && (
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => removeCustomEvent(e.id)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No events on this day.</p>
+              )}
+            </div>
+          )}
+
+          {/* Legend */}
+          <div className="flex gap-4 mt-4 pt-3 border-t border-border">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Invoice Due</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Payroll</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Compliance</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-violet-500" /> Custom</div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ---------- helpers ----------
 
@@ -128,10 +307,49 @@ export function DashboardOwner() {
   const payrollHistory = useAppStore((s) => s.payrollHistory);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
+
+  // ---------- calendar events ----------
+
+  const calendarEvents: CalendarEvent[] = useMemo(() => {
+    const events: CalendarEvent[] = [];
+
+    // Invoice due dates
+    invoices.forEach(inv => {
+      const parsed = new Date(inv.dueDate);
+      if (!isNaN(parsed.getTime())) {
+        const key = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+        events.push({
+          id: `inv-${inv.id}`,
+          title: `${inv.id} due (${inv.client})`,
+          date: key,
+          type: "invoice-due",
+          color: inv.status === "Overdue" ? "bg-red-500" : "bg-amber-500"
+        });
+      }
+    });
+
+    // Payroll disbursement dates
+    payrollHistory.forEach(ph => {
+      const parsed = new Date(ph.disbursedAt);
+      if (!isNaN(parsed.getTime())) {
+        const key = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+        events.push({ id: `pay-${ph.id}`, title: `Payroll: ${ph.period}`, date: key, type: "payroll", color: "bg-emerald-500" });
+      }
+    });
+
+    // Compliance: PAYE / NSSF / SHA on the 9th and 15th of each month
+    events.push({ id: "comp-paye-jul", title: "PAYE Filing Deadline", date: "2026-07-09", type: "compliance", color: "bg-red-500" });
+    events.push({ id: "comp-nssf-jul", title: "NSSF/SHA Remittance", date: "2026-07-15", type: "compliance", color: "bg-red-500" });
+    events.push({ id: "comp-vat-jul", title: "VAT Return Due", date: "2026-07-20", type: "compliance", color: "bg-red-500" });
+
+    return events;
+  }, [invoices, payrollHistory]);
 
   // ---------- derived KPIs ----------
 
@@ -429,10 +647,13 @@ export function DashboardOwner() {
           <div className="h-4 w-px bg-primary-foreground/20"></div>
           <p className="text-sm text-primary-foreground/90">{cfg.complianceText}</p>
         </div>
-        <button onClick={() => handleNotImplemented("View Calendar")} className="px-4 py-1.5 bg-background text-primary rounded-lg text-xs font-bold hover:bg-muted transition-colors">
+        <button onClick={() => setCalendarOpen(true)} className="px-4 py-1.5 bg-background text-primary rounded-lg text-xs font-bold hover:bg-muted transition-colors">
           View Calendar
         </button>
       </div>
+
+      {/* Calendar Dialog */}
+      <CalendarDialog open={calendarOpen} onOpenChange={setCalendarOpen} events={calendarEvents} />
     </div>
   );
 }
