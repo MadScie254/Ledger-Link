@@ -1,9 +1,10 @@
 import { jsPDF } from "jspdf";
 import { OrgProfile } from "@/store/useAppStore";
+import { PayrollBreakdown } from "./calculatePayroll";
 
 export function generatePayslipPDF(
   employee: { id: string; name: string; role: string; gross: number },
-  deductions: { paye: number; nssf: number; sha: number; net: number },
+  deductions: PayrollBreakdown,
   orgProfile: OrgProfile,
   period: string
 ) {
@@ -51,26 +52,35 @@ export function generatePayslipPDF(
   const lineSpacing = 10;
   
   doc.text("Gross Salary:", 25, startY);
-  doc.text(`KES ${employee.gross.toLocaleString()}`, 150, startY);
+  doc.text(`KES ${employee.gross.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY);
 
-  doc.text("PAYE (Tax):", 25, startY + lineSpacing);
-  doc.text(`- KES ${deductions.paye.toLocaleString()}`, 150, startY + lineSpacing);
+  doc.text("Taxable Pay:", 25, startY + lineSpacing);
+  doc.text(`KES ${deductions.taxablePay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing);
 
-  doc.text("NSSF:", 25, startY + lineSpacing * 2);
-  doc.text(`- KES ${deductions.nssf.toLocaleString()}`, 150, startY + lineSpacing * 2);
+  doc.text("PAYE (Tax):", 25, startY + lineSpacing * 2);
+  doc.text(`- KES ${deductions.paye.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 2);
 
-  doc.text("SHA:", 25, startY + lineSpacing * 3);
-  doc.text(`- KES ${deductions.sha.toLocaleString()}`, 150, startY + lineSpacing * 3);
+  doc.text("Personal Relief:", 25, startY + lineSpacing * 3);
+  doc.text(`+ KES ${deductions.personalRelief.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 3);
+
+  doc.text("NSSF:", 25, startY + lineSpacing * 4);
+  doc.text(`- KES ${deductions.nssf.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 4);
+
+  doc.text("SHIF:", 25, startY + lineSpacing * 5);
+  doc.text(`- KES ${deductions.shif.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 5);
+
+  doc.text("AHL:", 25, startY + lineSpacing * 6);
+  doc.text(`- KES ${deductions.ahl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 6);
 
   // Net Pay Line
   doc.setDrawColor(200);
-  doc.line(25, startY + lineSpacing * 4 - 3, 185, startY + lineSpacing * 4 - 3);
+  doc.line(25, startY + lineSpacing * 7 - 3, 185, startY + lineSpacing * 7 - 3);
 
   doc.setFontSize(12);
   doc.setTextColor(0);
   doc.setFont("helvetica", "bold");
-  doc.text("Net Pay:", 25, startY + lineSpacing * 5);
-  doc.text(`KES ${deductions.net.toLocaleString()}`, 150, startY + lineSpacing * 5);
+  doc.text("Net Pay:", 25, startY + lineSpacing * 8);
+  doc.text(`KES ${deductions.net.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, startY + lineSpacing * 8);
   doc.setFont("helvetica", "normal");
 
   // Footer
