@@ -8,6 +8,51 @@ export const chartData = [
   { name: "Jul", revenue: 3490, expenses: 4300 },
 ];
 
+export const initialAccounts = [
+  { id: "ACC-001", name: "Tuition/Service Income", type: "Income" },
+  { id: "ACC-002", name: "Donations & Offerings Income", type: "Income" },
+  { id: "ACC-003", name: "Payroll Expense", type: "Expense" },
+  { id: "ACC-004", name: "Rent Expense", type: "Expense" },
+  { id: "ACC-005", name: "Utilities Expense", type: "Expense" },
+  { id: "ACC-006", name: "Supplies Expense", type: "Expense" },
+  { id: "ACC-007", name: "Bank & Cash", type: "Asset" },
+  { id: "ACC-008", name: "Accounts Receivable", type: "Asset" },
+  { id: "ACC-009", name: "Accounts Payable", type: "Liability" }
+];
+
+export const initialBills = [
+  {
+    id: "BILL-2026-001",
+    vendor: "KPLC",
+    accountId: "ACC-005",
+    amount: 15000,
+    date: "Jul 02, 2026",
+    dueDate: "Jul 10, 2026",
+    status: "Paid",
+    notes: "Electricity for July"
+  },
+  {
+    id: "BILL-2026-002",
+    vendor: "Nairobi Water",
+    accountId: "ACC-005",
+    amount: 8500,
+    date: "Jul 05, 2026",
+    dueDate: "Jul 20, 2026",
+    status: "Unpaid",
+    notes: "Water supply"
+  },
+  {
+    id: "BILL-2026-003",
+    vendor: "OfficeMart",
+    accountId: "ACC-006",
+    amount: 32000,
+    date: "Jul 08, 2026",
+    dueDate: "Jul 22, 2026",
+    status: "Paid",
+    notes: "Stationery and printer ink"
+  }
+];
+
 export const initialCustomers = [
   { id: "CUST-001", name: "Nairobi Academy", email: "finance@nairobiacademy.ac.ke", phone: "+254 700 111222", address: "P.O. Box 12345, Nairobi", sector: "Education" },
   { id: "CUST-002", name: "Tech Solutions Ltd", email: "accounts@techsolutions.co.ke", phone: "+254 722 333444", address: "Westlands, Nairobi", sector: "Technology" },
@@ -20,6 +65,7 @@ export const initialInvoices = [
   {
     id: "INV-2026-001",
     clientId: "CUST-001",
+    accountId: "ACC-001",
     client: "Nairobi Academy",
     clientEmail: "finance@nairobiacademy.ac.ke",
     clientPhone: "+254 700 111222",
@@ -40,6 +86,7 @@ export const initialInvoices = [
   {
     id: "INV-2026-002",
     clientId: "CUST-002",
+    accountId: "ACC-001",
     client: "Tech Solutions Ltd",
     clientEmail: "accounts@techsolutions.co.ke",
     clientPhone: "+254 722 333444",
@@ -59,6 +106,7 @@ export const initialInvoices = [
   {
     id: "INV-2026-003",
     clientId: "CUST-003",
+    accountId: "ACC-001",
     client: "St. John's Hospital",
     clientEmail: "billing@stjohns.org",
     clientPhone: "+254 733 555666",
@@ -78,6 +126,7 @@ export const initialInvoices = [
   {
     id: "INV-2026-004",
     clientId: "CUST-004",
+    accountId: "ACC-002",
     client: "Emmanuel Church",
     clientEmail: "admin@emmanuelchurch.or.ke",
     clientPhone: "+254 711 777888",
@@ -97,6 +146,7 @@ export const initialInvoices = [
   {
     id: "INV-2026-005",
     clientId: "CUST-005",
+    accountId: "ACC-001",
     client: "Legal Associates",
     clientEmail: "partners@legalassociates.co.ke",
     clientPhone: "+254 700 999000",
