@@ -7,6 +7,7 @@ import {
   LineChart,
   Settings,
   X,
+  PieChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
@@ -19,6 +20,7 @@ const navigation = [
   { name: "Payroll", href: "/payroll", icon: Users, roles: ["owner", "finance"] },
   { name: "Inventory", href: "/inventory", icon: Package, roles: ["owner", "finance", "board"] },
   { name: "Accounting", href: "/accounting", icon: LineChart, roles: ["owner", "finance", "board"] },
+  { name: "Reports", href: "/reports", icon: PieChart, roles: ["owner", "finance", "board"] },
   { name: "Settings", href: "/settings", icon: Settings, roles: ["owner"] },
 ];
 

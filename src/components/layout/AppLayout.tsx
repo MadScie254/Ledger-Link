@@ -4,10 +4,12 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Dashboard } from "@/pages/Dashboard";
 import { Clients } from "@/pages/Clients";
+import { Clients } from "@/pages/Clients";
 import { Invoicing } from "@/pages/Invoicing";
 import { Payroll } from "@/pages/Payroll";
 import { Inventory } from "@/pages/Inventory";
 import { Accounting } from "@/pages/Accounting";
+import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -29,6 +31,7 @@ export function AppLayout() {
               <Route path="/payroll/*" element={<Payroll />} />
               <Route path="/inventory/*" element={<Inventory />} />
               <Route path="/accounting/*" element={<Accounting />} />
+              <Route path="/reports/*" element={<Reports />} />
               <Route path="/settings/*" element={<Settings />} />
               <Route path="*" element={
                 <div className="flex h-full items-center justify-center text-slate-500">
