@@ -5,7 +5,8 @@ import {
   initialStaffData, 
   initialInventory, 
   initialMpesaTransactions, 
-  initialBankTransactions 
+  initialBankTransactions,
+  initialCustomers
 } from '@/lib/mockData';
 
 export interface OrgProfile {
@@ -43,8 +44,18 @@ export interface InvoiceReminder {
   method: "Email" | "SMS";
 }
 
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  sector: string;
+}
+
 export interface Invoice {
   id: string;
+  clientId: string;
   client: string;
   clientEmail: string;
   clientPhone: string;
@@ -69,6 +80,9 @@ interface AppState {
   updateInvoiceStatus: (id: string, status: string) => void;
   addInvoice: (invoice: Omit<Invoice, "id" | "amount" | "rawAmount" | "status" | "reminders">) => void;
   addReminder: (id: string, method: "Email" | "SMS") => void;
+
+  customers: Customer[];
+  addCustomer: (customer: Omit<Customer, "id">) => void;
 
   staff: typeof initialStaffData;
   setStaff: (staff: typeof initialStaffData) => void;
@@ -100,6 +114,14 @@ export const useAppStore = create<AppState>()(
       },
       setOrgProfile: (profile) => 
         set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
+
+      customers: initialCustomers as Customer[],
+      addCustomer: (customer) =>
+        set((state) => {
+          const lastNum = state.customers.length;
+          const nextId = `CUST-${String(lastNum + 1).padStart(3, '0')}`;
+          return { customers: [...state.customers, { ...customer, id: nextId }] };
+        }),
 
       invoices: initialInvoices as Invoice[],
       setInvoices: (invoices) => set({ invoices }),

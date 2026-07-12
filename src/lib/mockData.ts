@@ -8,9 +8,18 @@ export const chartData = [
   { name: "Jul", revenue: 3490, expenses: 4300 },
 ];
 
+export const initialCustomers = [
+  { id: "CUST-001", name: "Nairobi Academy", email: "finance@nairobiacademy.ac.ke", phone: "+254 700 111222", address: "P.O. Box 12345, Nairobi", sector: "Education" },
+  { id: "CUST-002", name: "Tech Solutions Ltd", email: "accounts@techsolutions.co.ke", phone: "+254 722 333444", address: "Westlands, Nairobi", sector: "Technology" },
+  { id: "CUST-003", name: "St. John's Hospital", email: "billing@stjohns.org", phone: "+254 733 555666", address: "Upper Hill, Nairobi", sector: "Healthcare" },
+  { id: "CUST-004", name: "Emmanuel Church", email: "admin@emmanuelchurch.or.ke", phone: "+254 711 777888", address: "Karen, Nairobi", sector: "Non-Profit" },
+  { id: "CUST-005", name: "Legal Associates", email: "partners@legalassociates.co.ke", phone: "+254 700 999000", address: "CBD, Nairobi", sector: "Professional Services" }
+];
+
 export const initialInvoices = [
   {
     id: "INV-2026-001",
+    clientId: "CUST-001",
     client: "Nairobi Academy",
     clientEmail: "finance@nairobiacademy.ac.ke",
     clientPhone: "+254 700 111222",
@@ -30,6 +39,7 @@ export const initialInvoices = [
   },
   {
     id: "INV-2026-002",
+    clientId: "CUST-002",
     client: "Tech Solutions Ltd",
     clientEmail: "accounts@techsolutions.co.ke",
     clientPhone: "+254 722 333444",
@@ -48,6 +58,7 @@ export const initialInvoices = [
   },
   {
     id: "INV-2026-003",
+    clientId: "CUST-003",
     client: "St. John's Hospital",
     clientEmail: "billing@stjohns.org",
     clientPhone: "+254 733 555666",
@@ -66,6 +77,7 @@ export const initialInvoices = [
   },
   {
     id: "INV-2026-004",
+    clientId: "CUST-004",
     client: "Emmanuel Church",
     clientEmail: "admin@emmanuelchurch.or.ke",
     clientPhone: "+254 711 777888",
@@ -84,6 +96,7 @@ export const initialInvoices = [
   },
   {
     id: "INV-2026-005",
+    clientId: "CUST-005",
     client: "Legal Associates",
     clientEmail: "partners@legalassociates.co.ke",
     clientPhone: "+254 700 999000",
