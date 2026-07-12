@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet } from "lucide-react";
+import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet, Receipt, Plus } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
   Table,
@@ -11,11 +11,54 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export function Accounting() {
-  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction } = useAppStore();
-  const [activeTab, setActiveTab] = useState<"mpesa" | "bank">("mpesa");
+  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, markBillPaid, accounts } = useAppStore();
+  const [activeTab, setActiveTab] = useState<"mpesa" | "bank" | "bills">("mpesa");
+
+  const [isAddBillOpen, setIsAddBillOpen] = useState(false);
+  const [newBillVendor, setNewBillVendor] = useState("");
+  const [newBillAccount, setNewBillAccount] = useState("");
+  const [newBillAmount, setNewBillAmount] = useState<number | "">("");
+  const [newBillDate, setNewBillDate] = useState(new Date().toISOString().split("T")[0]);
+  const [newBillDueDate, setNewBillDueDate] = useState("");
+  const [newBillNotes, setNewBillNotes] = useState("");
+
+  const handleAddBill = () => {
+    if (!newBillVendor.trim() || !newBillAccount || !newBillAmount || !newBillDueDate) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    const formattedDate = new Date(newBillDate).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const formattedDue = new Date(newBillDueDate).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    
+    addBill({
+      vendor: newBillVendor,
+      accountId: newBillAccount,
+      amount: Number(newBillAmount),
+      date: formattedDate,
+      dueDate: formattedDue,
+      status: "Unpaid",
+      notes: newBillNotes
+    });
+    toast.success("Bill created successfully");
+    setIsAddBillOpen(false);
+    setNewBillVendor("");
+    setNewBillAccount("");
+    setNewBillAmount("");
+    setNewBillDueDate("");
+    setNewBillNotes("");
+  };
 
   const handleMatch = (type: "mpesa" | "bank", id: string) => {
     if (type === "mpesa") {
@@ -42,14 +85,73 @@ export function Accounting() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Export Reports")}>
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Export Reports
-          </Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleNotImplemented("Run Auto-Match")}>
-            <ArrowRightLeft className="mr-2 h-4 w-4" />
-            Run Auto-Match
-          </Button>
+          {activeTab === "bills" && (
+            <Dialog open={isAddBillOpen} onOpenChange={setIsAddBillOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Bill
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Bill</DialogTitle>
+                  <DialogDescription>Record a new expense or vendor bill.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Vendor Name *</label>
+                    <input value={newBillVendor} onChange={(e) => setNewBillVendor(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Category *</label>
+                    <select value={newBillAccount} onChange={(e) => setNewBillAccount(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
+                      <option value="" disabled>Select Expense Account...</option>
+                      {accounts.filter(a => a.type === "Expense").map(acc => (
+                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Amount *</label>
+                    <input type="number" value={newBillAmount} onChange={(e) => setNewBillAmount(e.target.value ? Number(e.target.value) : "")} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-1 block">Bill Date *</label>
+                      <input type="date" value={newBillDate} onChange={(e) => setNewBillDate(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-1 block">Due Date *</label>
+                      <input type="date" value={newBillDueDate} onChange={(e) => setNewBillDueDate(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Notes</label>
+                    <textarea value={newBillNotes} onChange={(e) => setNewBillNotes(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button onClick={handleAddBill}>Save Bill</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+          {activeTab !== "bills" && (
+            <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Export Reports")}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Export Reports
+            </Button>
+          )}
+          {activeTab !== "bills" && (
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleNotImplemented("Run Auto-Match")}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Run Auto-Match
+            </Button>
+          )}
         </div>
       </div>
       
@@ -75,6 +177,17 @@ export function Accounting() {
         >
           <Landmark className="h-4 w-4" />
           Bank Feeds
+        </button>
+        <button
+          onClick={() => setActiveTab("bills")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            activeTab === "bills"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <Receipt className="h-4 w-4" />
+          Bills / Expenses
         </button>
       </div>
 
@@ -173,6 +286,63 @@ export function Accounting() {
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No bank transactions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+
+          {activeTab === "bills" && (
+            <Table>
+              <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
+                <TableRow>
+                  <TableHead>Bill ID</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bills.map((bill) => {
+                  const accName = accounts.find(a => a.id === bill.accountId)?.name || "Unknown";
+                  return (
+                    <TableRow key={bill.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium text-primary text-xs">{bill.id}</TableCell>
+                      <TableCell className="font-medium text-card-foreground">{bill.vendor}</TableCell>
+                      <TableCell className="text-muted-foreground">{accName}</TableCell>
+                      <TableCell className="text-muted-foreground">{bill.date}</TableCell>
+                      <TableCell className="text-muted-foreground">{bill.dueDate}</TableCell>
+                      <TableCell className="font-bold">KES {bill.amount.toLocaleString()}</TableCell>
+                      <TableCell>
+                        {bill.status === "Paid" ? (
+                          <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                            Paid
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                            Unpaid
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {bill.status === "Unpaid" && (
+                          <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => markBillPaid(bill.id)}>
+                            <FileCheck className="h-4 w-4 mr-1" /> Mark Paid
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {bills.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      No bills found.
                     </TableCell>
                   </TableRow>
                 )}
