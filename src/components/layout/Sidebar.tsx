@@ -14,6 +14,7 @@ import { useEffect } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["owner", "finance", "board"] },
+  { name: "Clients", href: "/clients", icon: Users, roles: ["owner", "finance"] },
   { name: "Invoicing", href: "/invoicing", icon: FileText, roles: ["owner", "finance"] },
   { name: "Payroll", href: "/payroll", icon: Users, roles: ["owner", "finance"] },
   { name: "Inventory", href: "/inventory", icon: Package, roles: ["owner", "finance", "board"] },

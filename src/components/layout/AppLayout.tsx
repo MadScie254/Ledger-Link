@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Dashboard } from "@/pages/Dashboard";
+import { Clients } from "@/pages/Clients";
 import { Invoicing } from "@/pages/Invoicing";
 import { Payroll } from "@/pages/Payroll";
 import { Inventory } from "@/pages/Inventory";
@@ -23,6 +24,7 @@ export function AppLayout() {
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard/*" element={<Dashboard />} />
+              <Route path="/clients/*" element={<Clients />} />
               <Route path="/invoicing/*" element={<Invoicing />} />
               <Route path="/payroll/*" element={<Payroll />} />
               <Route path="/inventory/*" element={<Inventory />} />
