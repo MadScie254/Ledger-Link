@@ -1,4 +1,4 @@
-import { Bell, Search, Moon, Sun, User, ChevronRight } from "lucide-react";
+import { Bell, Search, Moon, Sun, User, ChevronRight, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,11 @@ import { useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { organization, role } = useAuth();
   const qbConnected = useAppStore((state) => state.orgProfile.qbConnected);
   const { theme, setTheme } = useTheme();
@@ -37,8 +41,17 @@ export function Header() {
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
-      <div className="flex flex-1 items-center gap-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-4 md:px-8">
+      <div className="flex flex-1 items-center gap-4 md:gap-6">
+        {/* Hamburger button — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors md:hidden"
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open navigation</span>
+        </button>
+
         <div className="flex items-center text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground transition-colors">LedgerLink</Link>
           <ChevronRight className="h-4 w-4 mx-1 opacity-50" />
@@ -118,3 +131,4 @@ export function Header() {
     </header>
   );
 }
+

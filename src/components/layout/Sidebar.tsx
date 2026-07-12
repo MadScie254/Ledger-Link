@@ -6,9 +6,11 @@ import {
   Package,
   LineChart,
   Settings,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["owner", "finance", "board"] },
@@ -19,17 +21,42 @@ const navigation = [
   { name: "Settings", href: "/settings", icon: Settings, roles: ["owner"] },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobileOpen?: boolean;
+  setIsMobileOpen?: (open: boolean) => void;
+}
+
+export function Sidebar({ isMobileOpen = false, setIsMobileOpen }: SidebarProps) {
   const { role, organization } = useAuth();
   const location = useLocation();
-  
-  return (
-    <aside className="hidden md:flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
-      <div className="flex items-center gap-3 p-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sm">
-          LL
+
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    if (isMobileOpen && setIsMobileOpen) {
+      setIsMobileOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  const sidebarContent = (
+    <>
+      <div className="flex items-center justify-between gap-3 p-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sm">
+            LL
+          </div>
+          <h1 className="text-xl font-bold tracking-tight">LedgerLink</h1>
         </div>
-        <h1 className="text-xl font-bold tracking-tight">LedgerLink</h1>
+        {/* Close button for mobile only */}
+        {setIsMobileOpen && (
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors md:hidden"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close sidebar</span>
+          </button>
+        )}
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto">
         <nav className="flex-1 space-y-1 px-4">
@@ -77,6 +104,30 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar — static, unchanged */}
+      <aside className="hidden md:flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shrink-0">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar — overlay drawer */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 transition-opacity"
+            onClick={() => setIsMobileOpen?.(false)}
+          />
+          {/* Drawer panel */}
+          <aside className="relative flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-xl animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

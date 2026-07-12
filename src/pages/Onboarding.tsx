@@ -81,10 +81,10 @@ export function Onboarding() {
               <p className="font-semibold">Action Required</p>
               <p>Configure your QBO credentials in Settings later, or connect now using OAuth.</p>
             </div>
-            <div className="flex gap-4">
-              <Button variant="outline" className="w-full" onClick={() => setStep(1)}>Back</Button>
-              <Button variant="outline" className="w-full" onClick={() => setStep(3)}>Skip</Button>
-              <Button className="w-full bg-emerald-600 text-white hover:bg-emerald-700" onClick={handleConnectQBO}>Connect QBO</Button>
+            <div className="flex flex-wrap gap-4">
+              <Button variant="outline" className="flex-1 min-w-0" onClick={() => setStep(1)}>Back</Button>
+              <Button variant="outline" className="flex-1 min-w-0" onClick={() => setStep(3)}>Skip</Button>
+              <Button className="flex-1 min-w-0 bg-emerald-600 text-white hover:bg-emerald-700" onClick={handleConnectQBO}>Connect QBO</Button>
             </div>
           </div>
         )}
