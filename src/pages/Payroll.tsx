@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { generatePayslipPDF } from "@/lib/generatePayslip";
 
 function PayrollSkeleton() {
   return (
@@ -64,7 +65,7 @@ function PayrollSkeleton() {
 }
 
 export function Payroll() {
-  const { staff, payrollHistory, disbursePayroll } = useAppStore();
+  const { staff, payrollHistory, disbursePayroll, orgProfile } = useAppStore();
   const [activeTab, setActiveTab] = useState<"directory" | "run">("directory");
   const [payrollRun, setPayrollRun] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
