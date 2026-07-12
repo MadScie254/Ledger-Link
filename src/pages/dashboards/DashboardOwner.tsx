@@ -125,6 +125,7 @@ export function DashboardOwner() {
   const staff = useAppStore((s) => s.staff);
   const inventory = useAppStore((s) => s.inventory);
   const sector = useAppStore((s) => s.orgProfile.sector);
+  const payrollHistory = useAppStore((s) => s.payrollHistory);
 
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -198,10 +199,20 @@ export function DashboardOwner() {
       }
     });
 
+    payrollHistory.forEach((ph) => {
+      items.push({
+        id: ph.id,
+        type: "Payroll Approved",
+        client: `${ph.employeeCount} Employees`,
+        amount: `KES ${ph.totalNet.toLocaleString()}`,
+        time: new Date(ph.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      });
+    });
+
     // Sort newest first (simple string sort works for "Mon DD, YYYY" format)
     items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
     return items.slice(0, 5);
-  }, [invoices]);
+  }, [invoices, payrollHistory]);
 
   // ---------- sector config ----------
 
