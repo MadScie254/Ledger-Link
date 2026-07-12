@@ -292,7 +292,12 @@ export function Payroll() {
                             <TableCell className="text-destructive">-{(d.sha).toLocaleString()}</TableCell>
                             <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">KES {d.net.toLocaleString()}</TableCell>
                             <TableCell className="text-right">
-                              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/10" onClick={() => handleNotImplemented("Download PDF")}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-primary hover:text-primary/80 hover:bg-primary/10" 
+                                onClick={() => generatePayslipPDF(s, d, orgProfile, currentPeriod)}
+                              >
                                 <FileDown className="h-4 w-4 mr-1" /> PDF
                               </Button>
                             </TableCell>
