@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
 export type Role = "owner" | "finance" | "board";
@@ -16,7 +16,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("owner");
   const orgProfile = useAppStore((state) => state.orgProfile);
-  const [isOnboarded, setIsOnboarded] = useState(false); // set to false to test onboarding
+  const [isOnboarded, setIsOnboarded] = useState(() => {
+    try {
+      return localStorage.getItem("ledgerlink_isOnboarded") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // Persist isOnboarded whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("ledgerlink_isOnboarded", String(isOnboarded));
+    } catch {
+      // localStorage unavailable — silently ignore
+    }
+  }, [isOnboarded]);
 
   const completeOnboarding = () => setIsOnboarded(true);
 
@@ -34,3 +49,4 @@ export function useAuth() {
   }
   return context;
 }
+

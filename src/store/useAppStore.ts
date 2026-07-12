@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { 
   initialInvoices, 
   initialStaffData, 
@@ -35,49 +36,58 @@ interface AppState {
   updateBankTransaction: (id: string, updates: Partial<typeof initialBankTransactions[0]>) => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  orgProfile: {
-    name: "Acme Kenya Ltd",
-    sector: "School",
-    qbConnected: false,
-  },
-  setOrgProfile: (profile) => 
-    set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      orgProfile: {
+        name: "Acme Kenya Ltd",
+        sector: "School",
+        qbConnected: false,
+      },
+      setOrgProfile: (profile) => 
+        set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
 
-  invoices: initialInvoices,
-  setInvoices: (invoices) => set({ invoices }),
-  updateInvoiceStatus: (id, status) => 
-    set((state) => ({
-      invoices: state.invoices.map((inv) => 
-        inv.id === id ? { ...inv, status } : inv
-      )
-    })),
+      invoices: initialInvoices,
+      setInvoices: (invoices) => set({ invoices }),
+      updateInvoiceStatus: (id, status) => 
+        set((state) => ({
+          invoices: state.invoices.map((inv) => 
+            inv.id === id ? { ...inv, status } : inv
+          )
+        })),
 
-  staff: initialStaffData,
-  setStaff: (staff) => set({ staff }),
+      staff: initialStaffData,
+      setStaff: (staff) => set({ staff }),
 
-  inventory: initialInventory,
-  setInventory: (inventory) => set({ inventory }),
-  updateInventoryQty: (id, delta) => 
-    set((state) => ({
-      inventory: state.inventory.map((item) => 
-        item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
-      )
-    })),
+      inventory: initialInventory,
+      setInventory: (inventory) => set({ inventory }),
+      updateInventoryQty: (id, delta) => 
+        set((state) => ({
+          inventory: state.inventory.map((item) => 
+            item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item
+          )
+        })),
 
-  mpesaTransactions: initialMpesaTransactions,
-  updateMpesaTransaction: (id, updates) => 
-    set((state) => ({
-      mpesaTransactions: state.mpesaTransactions.map((tx) =>
-        tx.id === id ? { ...tx, ...updates } : tx
-      )
-    })),
+      mpesaTransactions: initialMpesaTransactions,
+      updateMpesaTransaction: (id, updates) => 
+        set((state) => ({
+          mpesaTransactions: state.mpesaTransactions.map((tx) =>
+            tx.id === id ? { ...tx, ...updates } : tx
+          )
+        })),
 
-  bankTransactions: initialBankTransactions,
-  updateBankTransaction: (id, updates) => 
-    set((state) => ({
-      bankTransactions: state.bankTransactions.map((tx) =>
-        tx.id === id ? { ...tx, ...updates } : tx
-      )
-    })),
-}));
+      bankTransactions: initialBankTransactions,
+      updateBankTransaction: (id, updates) => 
+        set((state) => ({
+          bankTransactions: state.bankTransactions.map((tx) =>
+            tx.id === id ? { ...tx, ...updates } : tx
+          )
+        })),
+    }),
+    {
+      name: 'ledgerlink-app-store',
+      partialize: (state) => ({ orgProfile: state.orgProfile }),
+    }
+  )
+);
+
