@@ -32,13 +32,43 @@ export interface PayrollHistoryEntry {
   disbursedAt: string;
 }
 
+export interface InvoiceLineItem {
+  description: string;
+  qty: number;
+  unitPrice: number;
+}
+
+export interface InvoiceReminder {
+  sentAt: string;
+  method: "Email" | "SMS";
+}
+
+export interface Invoice {
+  id: string;
+  client: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientAddress: string;
+  amount: string;
+  rawAmount: number;
+  status: string;
+  date: string;
+  dueDate: string;
+  lineItems: InvoiceLineItem[];
+  taxRate: number;
+  notes: string;
+  reminders: InvoiceReminder[];
+}
+
 interface AppState {
   orgProfile: OrgProfile;
   setOrgProfile: (profile: Partial<OrgProfile>) => void;
   
-  invoices: typeof initialInvoices;
-  setInvoices: (invoices: typeof initialInvoices) => void;
+  invoices: Invoice[];
+  setInvoices: (invoices: Invoice[]) => void;
   updateInvoiceStatus: (id: string, status: string) => void;
+  addInvoice: (invoice: Omit<Invoice, "id" | "amount" | "rawAmount" | "status" | "reminders">) => void;
+  addReminder: (id: string, method: "Email" | "SMS") => void;
 
   staff: typeof initialStaffData;
   setStaff: (staff: typeof initialStaffData) => void;
@@ -71,12 +101,40 @@ export const useAppStore = create<AppState>()(
       setOrgProfile: (profile) => 
         set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
 
-      invoices: initialInvoices,
+      invoices: initialInvoices as Invoice[],
       setInvoices: (invoices) => set({ invoices }),
       updateInvoiceStatus: (id, status) => 
         set((state) => ({
           invoices: state.invoices.map((inv) => 
             inv.id === id ? { ...inv, status } : inv
+          )
+        })),
+      addInvoice: (invoice) => 
+        set((state) => {
+          const lastNum = state.invoices.length;
+          const nextId = `INV-2026-${String(lastNum + 1).padStart(3, '0')}`;
+          
+          const subtotal = invoice.lineItems.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
+          const tax = subtotal * (invoice.taxRate / 100);
+          const rawAmount = subtotal + tax;
+
+          const newInvoice: Invoice = {
+            ...invoice,
+            id: nextId,
+            rawAmount,
+            amount: rawAmount.toLocaleString(),
+            status: "Pending",
+            reminders: [],
+          };
+          return { invoices: [...state.invoices, newInvoice] };
+        }),
+      addReminder: (id, method) =>
+        set((state) => ({
+          invoices: state.invoices.map((inv) => 
+            inv.id === id ? { 
+              ...inv, 
+              reminders: [...inv.reminders, { sentAt: new Date().toISOString(), method }] 
+            } : inv
           )
         })),
 

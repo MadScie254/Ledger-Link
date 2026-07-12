@@ -12,47 +12,93 @@ export const initialInvoices = [
   {
     id: "INV-2026-001",
     client: "Nairobi Academy",
+    clientEmail: "finance@nairobiacademy.ac.ke",
+    clientPhone: "+254 700 111222",
+    clientAddress: "P.O. Box 12345, Nairobi",
     amount: "450,000",
     rawAmount: 450000,
     status: "Paid",
     date: "Jul 01, 2026",
     dueDate: "Jul 15, 2026",
+    lineItems: [
+      { description: "Annual Tuition Fee", qty: 10, unitPrice: 40000 },
+      { description: "Transport Fee", qty: 10, unitPrice: 5000 }
+    ],
+    taxRate: 0,
+    notes: "Thank you for your business.",
+    reminders: [],
   },
   {
     id: "INV-2026-002",
     client: "Tech Solutions Ltd",
+    clientEmail: "accounts@techsolutions.co.ke",
+    clientPhone: "+254 722 333444",
+    clientAddress: "Westlands, Nairobi",
     amount: "85,000",
     rawAmount: 85000,
     status: "Pending",
     date: "Jul 10, 2026",
     dueDate: "Jul 24, 2026",
+    lineItems: [
+      { description: "Software License", qty: 1, unitPrice: 73275 }
+    ],
+    taxRate: 16,
+    notes: "Payment due in 14 days.",
+    reminders: [],
   },
   {
     id: "INV-2026-003",
     client: "St. John's Hospital",
+    clientEmail: "billing@stjohns.org",
+    clientPhone: "+254 733 555666",
+    clientAddress: "Upper Hill, Nairobi",
     amount: "1,250,000",
     rawAmount: 1250000,
     status: "Overdue",
     date: "Jun 01, 2026",
     dueDate: "Jun 15, 2026",
+    lineItems: [
+      { description: "Medical Equipment Supply", qty: 5, unitPrice: 215517 }
+    ],
+    taxRate: 16,
+    notes: "Please expedite payment.",
+    reminders: [{ sentAt: "2026-06-20T10:00:00Z", method: "Email" as const }],
   },
   {
     id: "INV-2026-004",
     client: "Emmanuel Church",
+    clientEmail: "admin@emmanuelchurch.or.ke",
+    clientPhone: "+254 711 777888",
+    clientAddress: "Karen, Nairobi",
     amount: "120,000",
     rawAmount: 120000,
     status: "Paid",
     date: "Jul 05, 2026",
     dueDate: "Jul 19, 2026",
+    lineItems: [
+      { description: "Event Catering", qty: 1, unitPrice: 120000 }
+    ],
+    taxRate: 0,
+    notes: "Thanks for trusting us with your event.",
+    reminders: [],
   },
   {
     id: "INV-2026-005",
     client: "Legal Associates",
+    clientEmail: "partners@legalassociates.co.ke",
+    clientPhone: "+254 700 999000",
+    clientAddress: "CBD, Nairobi",
     amount: "350,000",
     rawAmount: 350000,
     status: "Pending",
     date: "Jul 11, 2026",
     dueDate: "Jul 25, 2026",
+    lineItems: [
+      { description: "Consultation Retainer", qty: 1, unitPrice: 301724 }
+    ],
+    taxRate: 16,
+    notes: "Monthly retainer fee.",
+    reminders: [],
   },
 ];
 
