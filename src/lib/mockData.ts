@@ -8,6 +8,17 @@ export const chartData = [
   { name: "Jul", revenue: 3490, expenses: 4300 },
 ];
 
+export const initialActivityLog = [
+  {
+    id: "act-1",
+    type: "System",
+    title: "Account Created",
+    description: "LedgerLink account initialized.",
+    timestamp: "2026-06-01T10:00:00Z",
+    icon: "shield"
+  }
+];
+
 export const initialAccounts = [
   { id: "ACC-001", name: "Tuition/Service Income", type: "Income" },
   { id: "ACC-002", name: "Donations & Offerings Income", type: "Income" },

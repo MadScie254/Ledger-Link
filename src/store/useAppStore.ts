@@ -8,7 +8,8 @@ import {
   initialBankTransactions,
   initialCustomers,
   initialAccounts,
-  initialBills
+  initialBills,
+  initialActivityLog
 } from '@/lib/mockData';
 
 export interface OrgProfile {
@@ -24,6 +25,15 @@ export interface MovementLogEntry {
   delta: number;
   reason: string;
   timestamp: string;
+}
+
+export interface ActivityEvent {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  icon?: string;
 }
 
 export interface PayrollHistoryEntry {
@@ -130,6 +140,9 @@ interface AppState {
 
   bankTransactions: typeof initialBankTransactions;
   updateBankTransaction: (id: string, updates: Partial<typeof initialBankTransactions[0]>) => void;
+
+  activityLog: ActivityEvent[];
+  addActivity: (event: Omit<ActivityEvent, 'id' | 'timestamp'>) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -143,12 +156,37 @@ export const useAppStore = create<AppState>()(
       setOrgProfile: (profile) => 
         set((state) => ({ orgProfile: { ...state.orgProfile, ...profile } })),
 
+      activityLog: initialActivityLog,
+      addActivity: (event) => 
+        set((state) => ({
+          activityLog: [
+            {
+              ...event,
+              id: Math.random().toString(36).substring(2, 9),
+              timestamp: new Date().toISOString(),
+            },
+            ...state.activityLog,
+          ].slice(0, 100)
+        })),
+
       customers: initialCustomers as Customer[],
       addCustomer: (customer) =>
         set((state) => {
           const lastNum = state.customers.length;
           const nextId = `CUST-${String(lastNum + 1).padStart(3, '0')}`;
-          return { customers: [...state.customers, { ...customer, id: nextId }] };
+          const newCustomer = { ...customer, id: nextId };
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Client Added",
+            title: newCustomer.name,
+            description: "New client profile created",
+            timestamp: new Date().toISOString(),
+            icon: "user",
+          };
+          return { 
+            customers: [...state.customers, newCustomer],
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
         }),
 
       accounts: initialAccounts as Account[],
@@ -173,20 +211,48 @@ export const useAppStore = create<AppState>()(
           return { bills: [...state.bills, { ...bill, id: nextId } as Bill] };
         }),
       markBillPaid: (id) =>
-        set((state) => ({
-          bills: state.bills.map((b) =>
-            b.id === id ? { ...b, status: "Paid" } : b
-          )
-        })),
+        set((state) => {
+          const bill = state.bills.find((b) => b.id === id);
+          if (!bill) return {};
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Bill Paid",
+            title: bill.id,
+            description: `Bill from ${bill.vendor} marked as paid`,
+            timestamp: new Date().toISOString(),
+            icon: "receipt",
+          };
+          return {
+            bills: state.bills.map((b) =>
+              b.id === id ? { ...b, status: "Paid" } : b
+            ),
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
+        }),
 
       invoices: initialInvoices as Invoice[],
       setInvoices: (invoices) => set({ invoices }),
       updateInvoiceStatus: (id, status) => 
-        set((state) => ({
-          invoices: state.invoices.map((inv) => 
-            inv.id === id ? { ...inv, status } : inv
-          )
-        })),
+        set((state) => {
+          const inv = state.invoices.find(i => i.id === id);
+          const newState = {
+            invoices: state.invoices.map((inv) => 
+              inv.id === id ? { ...inv, status } : inv
+            )
+          };
+          if (inv && status === "Paid") {
+            const act = {
+              id: Math.random().toString(36).substring(2, 9),
+              type: "Invoice Paid",
+              title: inv.id,
+              description: `Invoice from ${inv.client} marked as paid`,
+              timestamp: new Date().toISOString(),
+              icon: "file-text",
+            };
+            return { ...newState, activityLog: [act, ...state.activityLog].slice(0, 100) };
+          }
+          return newState;
+        }),
       addInvoice: (invoice) => 
         set((state) => {
           const lastNum = state.invoices.length;
@@ -204,7 +270,20 @@ export const useAppStore = create<AppState>()(
             status: "Pending",
             reminders: [],
           };
-          return { invoices: [...state.invoices, newInvoice] };
+          
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Invoice Created",
+            title: newInvoice.id,
+            description: `Invoice generated for ${newInvoice.client}`,
+            timestamp: new Date().toISOString(),
+            icon: "file-text",
+          };
+          
+          return { 
+            invoices: [...state.invoices, newInvoice],
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
         }),
       addReminder: (id, method) =>
         set((state) => ({
@@ -256,19 +335,53 @@ export const useAppStore = create<AppState>()(
 
       mpesaTransactions: initialMpesaTransactions,
       updateMpesaTransaction: (id, updates) => 
-        set((state) => ({
-          mpesaTransactions: state.mpesaTransactions.map((tx) =>
-            tx.id === id ? { ...tx, ...updates } : tx
-          )
-        })),
+        set((state) => {
+          const newState = {
+            mpesaTransactions: state.mpesaTransactions.map((tx) =>
+              tx.id === id ? { ...tx, ...updates } : tx
+            )
+          };
+          if (updates.status === "Matched") {
+            const tx = state.mpesaTransactions.find((t) => t.id === id);
+            if (tx) {
+              const act = {
+                id: Math.random().toString(36).substring(2, 9),
+                type: "Transaction Matched",
+                title: tx.id,
+                description: `M-Pesa transaction matched (KES ${tx.amount})`,
+                timestamp: new Date().toISOString(),
+                icon: "check-circle",
+              };
+              return { ...newState, activityLog: [act, ...state.activityLog].slice(0, 100) };
+            }
+          }
+          return newState;
+        }),
 
       bankTransactions: initialBankTransactions,
       updateBankTransaction: (id, updates) => 
-        set((state) => ({
-          bankTransactions: state.bankTransactions.map((tx) =>
-            tx.id === id ? { ...tx, ...updates } : tx
-          )
-        })),
+        set((state) => {
+          const newState = {
+            bankTransactions: state.bankTransactions.map((tx) =>
+              tx.id === id ? { ...tx, ...updates } : tx
+            )
+          };
+          if (updates.status === "Matched") {
+            const tx = state.bankTransactions.find((t) => t.id === id);
+            if (tx) {
+              const act = {
+                id: Math.random().toString(36).substring(2, 9),
+                type: "Transaction Matched",
+                title: tx.id,
+                description: `Bank transaction matched (KES ${tx.amount})`,
+                timestamp: new Date().toISOString(),
+                icon: "check-circle",
+              };
+              return { ...newState, activityLog: [act, ...state.activityLog].slice(0, 100) };
+            }
+          }
+          return newState;
+        }),
     }),
     {
       name: 'ledgerlink-app-store',

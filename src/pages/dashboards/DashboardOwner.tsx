@@ -8,12 +8,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { chartData } from "@/lib/mockData";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, ChevronLeft, ChevronRight, MapPin, Plus, X } from "lucide-react";
+import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -305,6 +304,10 @@ export function DashboardOwner() {
   const inventory = useAppStore((s) => s.inventory);
   const sector = useAppStore((s) => s.orgProfile.sector);
   const payrollHistory = useAppStore((s) => s.payrollHistory);
+  const mpesaTransactions = useAppStore((s) => s.mpesaTransactions);
+  const bankTransactions = useAppStore((s) => s.bankTransactions);
+  const bills = useAppStore((s) => s.bills);
+  const activityLog = useAppStore((s) => s.activityLog);
 
   const [isLoading, setIsLoading] = useState(true);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -384,53 +387,36 @@ export function DashboardOwner() {
     [inventory]
   );
 
-  // ---------- recent activity (derived) ----------
+  const cashPosition = useMemo(() => {
+    let cash = 2000000;
+    mpesaTransactions.filter(t => t.status === "Matched").forEach(t => cash += t.amount);
+    bankTransactions.filter(t => t.status === "Matched").forEach(t => cash += t.amount);
+    bills.filter(b => b.status === "Paid").forEach(b => cash -= b.amount);
+    payrollHistory.forEach(p => cash -= p.totalNet);
+    return cash;
+  }, [mpesaTransactions, bankTransactions, bills, payrollHistory]);
 
-  const recentActivity = useMemo(() => {
-    const items: { id: string; type: string; client: string; amount: string; time: string }[] = [];
+  const dynamicChartData = useMemo(() => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const data = months.map(m => ({ name: m, revenue: 0, expenses: 0 }));
 
-    invoices.forEach((inv) => {
-      if (inv.status === "Paid") {
-        items.push({
-          id: inv.id,
-          type: "Invoice Paid",
-          client: inv.client,
-          amount: `KES ${inv.amount}`,
-          time: inv.date,
-        });
-      } else if (inv.status === "Pending") {
-        items.push({
-          id: inv.id,
-          type: "Invoice Sent",
-          client: inv.client,
-          amount: `KES ${inv.amount}`,
-          time: inv.date,
-        });
-      } else if (inv.status === "Overdue") {
-        items.push({
-          id: inv.id,
-          type: "Invoice Overdue",
-          client: inv.client,
-          amount: `KES ${inv.amount}`,
-          time: inv.date,
-        });
-      }
+    invoices.filter(i => i.status === "Paid").forEach(inv => {
+      const d = new Date(inv.date);
+      if (d.getFullYear() === 2026) data[d.getMonth()].revenue += inv.rawAmount;
     });
 
-    payrollHistory.forEach((ph) => {
-      items.push({
-        id: ph.id,
-        type: "Payroll Approved",
-        client: `${ph.employeeCount} Employees`,
-        amount: `KES ${ph.totalNet.toLocaleString()}`,
-        time: new Date(ph.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      });
+    bills.filter(b => b.status === "Paid").forEach(b => {
+      const d = new Date(b.date);
+      if (d.getFullYear() === 2026) data[d.getMonth()].expenses += b.amount;
     });
 
-    // Sort newest first (simple string sort works for "Mon DD, YYYY" format)
-    items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-    return items.slice(0, 5);
-  }, [invoices, payrollHistory]);
+    payrollHistory.forEach(ph => {
+      const d = new Date(ph.disbursedAt);
+      if (d.getFullYear() === 2026) data[d.getMonth()].expenses += ph.totalNet;
+    });
+
+    return data.slice(0, 7);
+  }, [invoices, bills, payrollHistory]);
 
   // ---------- sector config ----------
 
@@ -482,9 +468,9 @@ export function DashboardOwner() {
             Cash Position
           </p>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">KES 3.1M</p>
+            <p className="text-2xl font-bold text-card-foreground">{formatKES(cashPosition)}</p>
             <span className="pb-1 text-xs font-medium text-emerald-500 dark:text-emerald-400">
-              Healthy
+              Live
             </span>
           </div>
         </div>
@@ -576,7 +562,7 @@ export function DashboardOwner() {
           </div>
           <div className="flex-1 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              <LineChart data={dynamicChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 500 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 500 }} dx={-10} />
@@ -597,39 +583,33 @@ export function DashboardOwner() {
             Recent Activity
           </h3>
           <div className="flex-1 space-y-4 overflow-y-auto">
-            {recentActivity.length === 0 && (
+            {activityLog.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">No recent activity.</p>
             )}
-            {recentActivity.map((activity, index) => {
-              const isLast = index === recentActivity.length - 1;
-              let initials = "LG";
-              let colorClass = "bg-muted text-muted-foreground";
-              if (activity.type.includes("Invoice Paid")) {
-                initials = "MP";
-                colorClass = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-              } else if (activity.type.includes("Overdue")) {
-                initials = "OD";
-                colorClass = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
-              } else if (activity.type.includes("Invoice Sent")) {
-                initials = "IS";
-                colorClass = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-              }
+            {activityLog.slice(0, 5).map((act, index) => {
+              const isLast = index === Math.min(activityLog.length, 5) - 1;
+              let Icon = Activity;
+              if (act.icon === "shield") Icon = Shield;
+              if (act.icon === "user") Icon = User;
+              if (act.icon === "receipt") Icon = Receipt;
+              if (act.icon === "file-text") Icon = FileText;
+              if (act.icon === "check-circle") Icon = CheckCircle;
 
               return (
-                <div key={activity.id} className={`flex items-start gap-3 pb-4 ${!isLast ? 'border-b border-border' : ''}`}>
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded font-bold text-xs uppercase ${colorClass}`}>
-                    {initials}
+                <div key={act.id} className={`flex items-start gap-3 pb-4 ${!isLast ? 'border-b border-border' : ''}`}>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs font-semibold text-card-foreground">
-                      {activity.type}
+                      {act.title}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      {activity.client} &middot; {activity.amount}
+                      {act.description}
                     </p>
                   </div>
                   <p className="ml-auto whitespace-nowrap text-[10px] text-muted-foreground">
-                    {activity.time}
+                    {new Date(act.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </p>
                 </div>
               );

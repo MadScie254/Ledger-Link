@@ -7,6 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/store/useAppStore";
@@ -22,6 +23,10 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { organization, role } = useAuth();
   const qbConnected = useAppStore((state) => state.orgProfile.qbConnected);
+  const customers = useAppStore((state) => state.customers);
+  const invoices = useAppStore((state) => state.invoices);
+  const bills = useAppStore((state) => state.bills);
+  const accounts = useAppStore((state) => state.accounts);
   const { theme, setTheme } = useTheme();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,12 +35,38 @@ export function Header({ onMenuClick }: HeaderProps) {
   const path = location.pathname.split('/').filter(Boolean)[0] || "dashboard";
   const title = path.charAt(0).toUpperCase() + path.slice(1);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      toast.info(`Search for "${searchQuery}" not implemented in this demo.`);
-    }
-  };
+  const searchResults = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase();
+    const results = [];
+    
+    customers.forEach(c => {
+      if (c.name.toLowerCase().includes(query) || c.id.toLowerCase().includes(query)) {
+        results.push({ type: "Client", id: c.id, title: c.name, subtitle: c.sector, link: "/clients" });
+      }
+    });
+    
+    invoices.forEach(i => {
+      if (i.client.toLowerCase().includes(query) || i.id.toLowerCase().includes(query)) {
+        results.push({ type: "Invoice", id: i.id, title: `${i.id} - ${i.client}`, subtitle: `KES ${i.amount}`, link: "/invoicing" });
+      }
+    });
+
+    bills.forEach(b => {
+      if (b.vendor.toLowerCase().includes(query) || b.id.toLowerCase().includes(query)) {
+        results.push({ type: "Bill", id: b.id, title: `${b.id} - ${b.vendor}`, subtitle: `KES ${b.amount.toLocaleString()}`, link: "/accounting" });
+      }
+    });
+
+    accounts.forEach(a => {
+      if (a.name.toLowerCase().includes(query)) {
+        results.push({ type: "Account", id: a.id, title: a.name, subtitle: a.type, link: "/settings" });
+      }
+    });
+
+    return results.slice(0, 8);
+  }, [searchQuery, customers, invoices, bills, accounts]);
 
   const handleNotImplemented = (action: string) => {
     toast.info(`${action} is not implemented in this demo.`);
@@ -59,7 +90,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <span className="font-medium text-foreground">{title}</span>
         </div>
 
-        <form onSubmit={handleSearch} className="relative w-96 max-w-md hidden md:block">
+        <div className="relative w-96 max-w-md hidden md:block">
           <Search
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
@@ -71,7 +102,33 @@ export function Header({ onMenuClick }: HeaderProps) {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-md border border-input bg-background py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
           />
-        </form>
+          {searchQuery.trim() && (
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-md border border-border bg-card shadow-lg z-50 overflow-hidden">
+              {searchResults.length > 0 ? (
+                <div className="flex flex-col">
+                  {searchResults.map(res => (
+                    <Link 
+                      key={res.id} 
+                      to={res.link}
+                      onClick={() => setSearchQuery("")}
+                      className="flex flex-col px-3 py-2 hover:bg-muted transition-colors border-b border-border last:border-0"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-foreground">{res.title}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{res.type}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{res.subtitle}</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 text-sm text-muted-foreground text-center">
+                  No results found for "{searchQuery}".
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -97,7 +154,9 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Bell className="h-4 w-4" aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <div className="p-4 text-sm text-center text-muted-foreground">
               No new notifications.
@@ -112,14 +171,16 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{organization}</p>
-                <p className="text-xs leading-none text-muted-foreground capitalize">
-                  {role}
-                </p>
-              </div>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{organization}</p>
+                  <p className="text-xs leading-none text-muted-foreground capitalize">
+                    {role}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleNotImplemented("Switch Organization")}>Switch Organization</DropdownMenuItem>
             <Link to="/settings"><DropdownMenuItem>Organization Settings</DropdownMenuItem></Link>

@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 
 export function Accounting() {
-  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, markBillPaid, accounts } = useAppStore();
+  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, markBillPaid, accounts, invoices, updateInvoiceStatus } = useAppStore();
   const [activeTab, setActiveTab] = useState<"mpesa" | "bank" | "bills">("mpesa");
 
   const [isAddBillOpen, setIsAddBillOpen] = useState(false);
@@ -69,8 +69,75 @@ export function Accounting() {
     toast.success("Transaction successfully matched and reconciled.");
   };
 
-  const handleNotImplemented = (feature: string) => {
-    toast.info(`${feature} is not implemented in this demo.`);
+  const handleExport = () => {
+    let csvData = "";
+    if (activeTab === "mpesa") {
+      csvData = "ID,Sender,Amount,Date,Status\n" + mpesaTransactions.map(t => `${t.id},"${t.sender}",${t.amount},${t.date},${t.status}`).join("\n");
+    } else if (activeTab === "bank") {
+      csvData = "ID,Description,Amount,Date,Status\n" + bankTransactions.map(t => `${t.id},"${t.sender}",${t.amount},${t.date},${t.status}`).join("\n");
+    } else {
+      csvData = "ID,Vendor,Amount,Date,Status\n" + bills.map(b => `${b.id},"${b.vendor}",${b.amount},${b.date},${b.status}`).join("\n");
+    }
+    
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${activeTab}_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Report exported to CSV.");
+  };
+
+  const handleAutoMatch = () => {
+    let matchCount = 0;
+
+    mpesaTransactions.forEach(t => {
+      if (t.status !== "Matched") {
+        const matchingInv = invoices.find(inv => 
+          (inv.status === "Pending" || inv.status === "Overdue") && 
+          inv.rawAmount === t.amount
+        );
+        if (matchingInv) {
+          updateInvoiceStatus(matchingInv.id, "Paid");
+          updateMpesaTransaction(t.id, { status: "Matched" });
+          matchCount++;
+        }
+      }
+    });
+
+    bankTransactions.forEach(t => {
+      if (t.status !== "Matched") {
+        const matchingInv = invoices.find(inv => 
+          (inv.status === "Pending" || inv.status === "Overdue") && 
+          inv.rawAmount === t.amount
+        );
+        if (matchingInv) {
+          updateInvoiceStatus(matchingInv.id, "Paid");
+          updateBankTransaction(t.id, { status: "Matched" });
+          matchCount++;
+          return;
+        }
+
+        const matchingBill = bills.find(b => 
+          b.status === "Unpaid" && 
+          b.amount === t.amount
+        );
+        if (matchingBill) {
+          markBillPaid(matchingBill.id);
+          updateBankTransaction(t.id, { status: "Matched" });
+          matchCount++;
+        }
+      }
+    });
+
+    if (matchCount > 0) {
+      toast.success(`Auto-Match complete. ${matchCount} transactions matched automatically!`);
+    } else {
+      toast.info("Auto-Match complete. No new matches found.");
+    }
   };
 
   return (
@@ -141,13 +208,13 @@ export function Accounting() {
             </Dialog>
           )}
           {activeTab !== "bills" && (
-            <Button variant="outline" className="text-foreground" onClick={() => handleNotImplemented("Export Reports")}>
+            <Button variant="outline" className="text-foreground" onClick={handleExport}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Export Reports
             </Button>
           )}
           {activeTab !== "bills" && (
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleNotImplemented("Run Auto-Match")}>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleAutoMatch}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Run Auto-Match
             </Button>
