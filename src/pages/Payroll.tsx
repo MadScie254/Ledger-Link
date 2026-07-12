@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileDown, Users, Calculator, CheckCircle2, Search } from "lucide-react";
@@ -23,12 +23,57 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function PayrollSkeleton() {
+  return (
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
+      <div className="flex items-end justify-between shrink-0">
+        <div>
+          <Skeleton className="h-8 w-28 mb-2" />
+          <Skeleton className="h-4 w-60" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-9 w-28 rounded-md" />
+          <Skeleton className="h-9 w-28 rounded-md" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 shrink-0">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-7 w-28" />
+          </div>
+        ))}
+      </div>
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-32 flex-1" />
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Payroll() {
   const { staff } = useAppStore();
   const [activeTab, setActiveTab] = useState<"directory" | "run">("directory");
   const [payrollRun, setPayrollRun] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   const calculateDeductions = (gross: number) => {
     const paye = gross * 0.25; // Simplified calculation
@@ -53,6 +98,8 @@ export function Payroll() {
   const handleNotImplemented = (feature: string) => {
     toast.info(`${feature} is not implemented in this demo.`);
   };
+
+  if (isLoading) return <PayrollSkeleton />;
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">

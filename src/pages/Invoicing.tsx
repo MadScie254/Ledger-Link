@@ -9,12 +9,49 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, MoreHorizontal, ArrowUpDown, Smartphone } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type SortField = "id" | "client" | "rawAmount" | "status" | "date" | "dueDate";
 type SortOrder = "asc" | "desc";
+
+function InvoicingSkeleton() {
+  return (
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
+      <div className="flex items-end justify-between shrink-0">
+        <div>
+          <Skeleton className="h-8 w-32 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-9 w-24 rounded-md" />
+          <Skeleton className="h-9 w-28 rounded-md" />
+        </div>
+      </div>
+      <div className="flex gap-2 shrink-0">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-20 rounded-full" />
+        ))}
+      </div>
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-4 w-36 flex-1" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Invoicing() {
   const { invoices } = useAppStore();
@@ -22,6 +59,12 @@ export function Invoicing() {
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -70,6 +113,8 @@ export function Invoicing() {
 
     return result;
   }, [invoices, filter, sortField, sortOrder]);
+
+  if (isLoading) return <InvoicingSkeleton />;
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
