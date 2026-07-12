@@ -6,7 +6,9 @@ import {
   initialInventory, 
   initialMpesaTransactions, 
   initialBankTransactions,
-  initialCustomers
+  initialCustomers,
+  initialAccounts,
+  initialBills
 } from '@/lib/mockData';
 
 export interface OrgProfile {
@@ -53,9 +55,27 @@ export interface Customer {
   sector: string;
 }
 
+export interface Account {
+  id: string;
+  name: string;
+  type: "Income" | "Expense" | "Asset" | "Liability";
+}
+
+export interface Bill {
+  id: string;
+  vendor: string;
+  accountId: string;
+  amount: number;
+  date: string;
+  dueDate: string;
+  status: "Unpaid" | "Paid";
+  notes: string;
+}
+
 export interface Invoice {
   id: string;
   clientId: string;
+  accountId?: string;
   client: string;
   clientEmail: string;
   clientPhone: string;
@@ -83,6 +103,14 @@ interface AppState {
 
   customers: Customer[];
   addCustomer: (customer: Omit<Customer, "id">) => void;
+
+  accounts: Account[];
+  addAccount: (account: Omit<Account, "id">) => void;
+  editAccount: (id: string, account: Partial<Account>) => void;
+
+  bills: Bill[];
+  addBill: (bill: Omit<Bill, "id">) => void;
+  markBillPaid: (id: string) => void;
 
   staff: typeof initialStaffData;
   setStaff: (staff: typeof initialStaffData) => void;
@@ -122,6 +150,34 @@ export const useAppStore = create<AppState>()(
           const nextId = `CUST-${String(lastNum + 1).padStart(3, '0')}`;
           return { customers: [...state.customers, { ...customer, id: nextId }] };
         }),
+
+      accounts: initialAccounts as Account[],
+      addAccount: (account) =>
+        set((state) => {
+          const lastNum = state.accounts.length;
+          const nextId = `ACC-${String(lastNum + 1).padStart(3, '0')}`;
+          return { accounts: [...state.accounts, { ...account, id: nextId } as Account] };
+        }),
+      editAccount: (id, updates) =>
+        set((state) => ({
+          accounts: state.accounts.map((acc) =>
+            acc.id === id ? { ...acc, ...updates } : acc
+          )
+        })),
+
+      bills: initialBills as Bill[],
+      addBill: (bill) =>
+        set((state) => {
+          const lastNum = state.bills.length;
+          const nextId = `BILL-2026-${String(lastNum + 1).padStart(3, '0')}`;
+          return { bills: [...state.bills, { ...bill, id: nextId } as Bill] };
+        }),
+      markBillPaid: (id) =>
+        set((state) => ({
+          bills: state.bills.map((b) =>
+            b.id === id ? { ...b, status: "Paid" } : b
+          )
+        })),
 
       invoices: initialInvoices as Invoice[],
       setInvoices: (invoices) => set({ invoices }),
