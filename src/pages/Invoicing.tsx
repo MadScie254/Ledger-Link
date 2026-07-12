@@ -75,12 +75,16 @@ function InvoicingSkeleton() {
 const emptyLineItem: InvoiceLineItem = { description: "", qty: 1, unitPrice: 0 };
 
 function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { addInvoice } = useAppStore();
+  const { addInvoice, customers, addCustomer } = useAppStore();
+
+  const [clientId, setClientId] = useState("");
+  const [isNewClientMode, setIsNewClientMode] = useState(false);
 
   const [client, setClient] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientAddress, setClientAddress] = useState("");
+  
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split("T")[0]);
   const [dueDate, setDueDate] = useState("");
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([{ ...emptyLineItem }]);
@@ -100,8 +104,51 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     setLineItems((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleCustomerSelect = (id: string) => {
+    if (id === "new_client") {
+      setIsNewClientMode(true);
+      setClientId("");
+      setClient("");
+      setClientEmail("");
+      setClientPhone("");
+      setClientAddress("");
+    } else {
+      setIsNewClientMode(false);
+      setClientId(id);
+      const cust = customers.find(c => c.id === id);
+      if (cust) {
+        setClient(cust.name);
+        setClientEmail(cust.email);
+        setClientPhone(cust.phone);
+        setClientAddress(cust.address);
+      }
+    }
+  };
+
   const handleSubmit = () => {
-    if (!client.trim()) { toast.error("Client name is required."); return; }
+    if (isNewClientMode) {
+      if (!client.trim()) { toast.error("Client name is required."); return; }
+      
+      const lastNum = customers.length;
+      const nextId = `CUST-${String(lastNum + 1).padStart(3, '0')}`;
+      
+      addCustomer({
+        name: client,
+        email: clientEmail,
+        phone: clientPhone,
+        address: clientAddress,
+        sector: "Other"
+      });
+      
+      createInvoiceCall(nextId);
+    } else {
+      if (!clientId) { toast.error("Please select a client."); return; }
+      if (!client.trim()) { toast.error("Client name snapshot is required."); return; }
+      createInvoiceCall(clientId);
+    }
+  };
+
+  const createInvoiceCall = (finalClientId: string) => {
     if (lineItems.some(li => !li.description.trim() || li.unitPrice <= 0)) { toast.error("Fill in all line items."); return; }
     if (!dueDate) { toast.error("Due date is required."); return; }
 
@@ -109,6 +156,7 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     const formattedDue = new Date(dueDate).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 
     addInvoice({
+      clientId: finalClientId,
       client,
       clientEmail,
       clientPhone,
@@ -123,7 +171,8 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     toast.success("Invoice created successfully.");
     onOpenChange(false);
     // Reset
-    setClient(""); setClientEmail(""); setClientPhone(""); setClientAddress("");
+    setIsNewClientMode(false);
+    setClientId(""); setClient(""); setClientEmail(""); setClientPhone(""); setClientAddress("");
     setLineItems([{ ...emptyLineItem }]); setNotes(""); setDueDate("");
   };
 
@@ -137,11 +186,21 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           <DialogDescription>Create a new invoice for a client.</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-auto space-y-5 pr-1">
-          {/* Client Info */}
+          {/* Client Selection */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Select Client *</label>
+            <select className={inputCls} value={isNewClientMode ? "new_client" : clientId} onChange={(e) => handleCustomerSelect(e.target.value)}>
+              <option value="" disabled>Select a client...</option>
+              {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <option value="new_client" className="font-bold text-primary">+ New Client</option>
+            </select>
+          </div>
+
+          {/* Client Details (Snapshot or New) */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Client Name *</label>
-              <input className={inputCls} value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. Nairobi Academy" />
+              <input className={inputCls} value={client} onChange={(e) => setClient(e.target.value)} placeholder="e.g. Nairobi Academy" disabled={!isNewClientMode && !!clientId} />
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
