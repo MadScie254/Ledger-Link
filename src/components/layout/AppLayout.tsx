@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { Dashboard } from "@/pages/Dashboard";
@@ -10,39 +11,29 @@ import { Settings } from "@/pages/Settings";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export function AppLayout() {
-  const [currentRoute, setCurrentRoute] = useState("dashboard");
-
-  const renderContent = () => {
-    switch (currentRoute) {
-      case "dashboard":
-        return <Dashboard />;
-      case "invoicing":
-        return <Invoicing />;
-      case "payroll":
-        return <Payroll />;
-      case "inventory":
-        return <Inventory />;
-      case "accounting":
-        return <Accounting />;
-      case "settings":
-        return <Settings />;
-      default:
-        return (
-          <div className="flex h-full items-center justify-center text-slate-500">
-            <p>Module '{currentRoute}' is under construction.</p>
-          </div>
-        );
-    }
-  };
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-full font-sans bg-slate-50 text-slate-900 overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
-      <Sidebar currentRoute={currentRoute} onNavigate={setCurrentRoute} />
+      <Sidebar isMobileOpen={isMobileSidebarOpen} setIsMobileOpen={setIsMobileSidebarOpen} />
       <div className="flex flex-1 flex-col min-w-0">
-        <Header />
+        <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-8 relative">
           <ErrorBoundary>
-            {renderContent()}
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard/*" element={<Dashboard />} />
+              <Route path="/invoicing/*" element={<Invoicing />} />
+              <Route path="/payroll/*" element={<Payroll />} />
+              <Route path="/inventory/*" element={<Inventory />} />
+              <Route path="/accounting/*" element={<Accounting />} />
+              <Route path="/settings/*" element={<Settings />} />
+              <Route path="*" element={
+                <div className="flex h-full items-center justify-center text-slate-500">
+                  <p>Module is under construction.</p>
+                </div>
+              } />
+            </Routes>
           </ErrorBoundary>
         </main>
       </div>
