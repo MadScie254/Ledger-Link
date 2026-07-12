@@ -241,25 +241,31 @@ export function Payroll() {
                       <p className="text-xs text-muted-foreground">All standard deductions applied (simplified tax math).</p>
                     </div>
                   </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
-                        Approve & Disburse
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Approve Payroll?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will finalize the July 2026 payroll run and schedule disbursements. This action cannot be easily undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleApproveDisburse}>Approve</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  {isDisbursed ? (
+                    <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-none px-3 py-1">
+                      Disbursed on {new Date(disbursedEntry!.disbursedAt).toLocaleDateString()}
+                    </Badge>
+                  ) : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
+                          Approve & Disburse
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Approve Payroll?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will finalize the {currentPeriod} payroll run and schedule disbursements. This action cannot be easily undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleApproveDisburse}>Approve</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
                 <div className="overflow-auto flex-1">
                   <Table>
