@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generatePayslipPDF } from "@/lib/generatePayslip";
+import { calculatePayroll } from "@/lib/calculatePayroll";
 
 function PayrollSkeleton() {
   return (
@@ -80,14 +81,6 @@ export function Payroll() {
     return () => clearTimeout(t);
   }, []);
 
-  const calculateDeductions = (gross: number) => {
-    const paye = gross * 0.25; // Simplified calculation
-    const nssf = 1080;
-    const sha = gross * 0.0275; 
-    const net = gross - paye - nssf - sha;
-    return { paye, nssf, sha, net };
-  };
-
   const filteredStaff = useMemo(() => {
     return staff.filter(s => 
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -103,7 +96,7 @@ export function Payroll() {
     
     activeStaff.forEach(s => {
       totalGross += s.gross;
-      totalNet += calculateDeductions(s.gross).net;
+      totalNet += calculatePayroll(s.gross).net;
     });
 
     disbursePayroll({
@@ -235,11 +228,11 @@ export function Payroll() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-card-foreground">July 2026 Payroll Generated</h3>
-                        <Badge variant="outline" className="text-[10px] uppercase border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
-                          Estimate Only
+                        <Badge variant="outline" className="text-[10px] uppercase border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                          2026 Rates
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">All standard deductions applied (simplified tax math).</p>
+                      <p className="text-xs text-muted-foreground">Accurate NSSF, SHIF, AHL, and progressive PAYE applied.</p>
                     </div>
                   </div>
                   {isDisbursed ? (
@@ -274,24 +267,28 @@ export function Payroll() {
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Gross</TableHead>
+                        <TableHead>Taxable</TableHead>
                         <TableHead>PAYE</TableHead>
                         <TableHead>NSSF</TableHead>
-                        <TableHead>SHA</TableHead>
+                        <TableHead>SHIF</TableHead>
+                        <TableHead>AHL</TableHead>
                         <TableHead className="font-bold text-foreground">Net Pay</TableHead>
                         <TableHead className="text-right">Payslip</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {staff.filter(s => s.status === 'Active').map(s => {
-                        const d = calculateDeductions(s.gross);
+                        const d = calculatePayroll(s.gross);
                         return (
                           <TableRow key={s.id} className="hover:bg-muted/50">
                             <TableCell className="font-medium text-card-foreground">{s.name}</TableCell>
                             <TableCell>KES {s.gross.toLocaleString()}</TableCell>
-                            <TableCell className="text-destructive">-{(d.paye).toLocaleString()}</TableCell>
-                            <TableCell className="text-destructive">-{(d.nssf).toLocaleString()}</TableCell>
-                            <TableCell className="text-destructive">-{(d.sha).toLocaleString()}</TableCell>
-                            <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">KES {d.net.toLocaleString()}</TableCell>
+                            <TableCell>KES {d.taxablePay.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="text-destructive">-{(d.paye).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="text-destructive">-{(d.nssf).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="text-destructive">-{(d.shif).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="text-destructive">-{(d.ahl).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">KES {d.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell className="text-right">
                               <Button 
                                 variant="ghost" 
