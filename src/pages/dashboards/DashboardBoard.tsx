@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { pageItem, pageStagger } from "@/lib/motion";
-import { Mail } from "lucide-react";
+import { Mail, LifeBuoy, MessageSquare, PhoneCall } from "lucide-react";
 
 function BoardSkeleton() {
   return (
@@ -125,19 +125,45 @@ export function DashboardBoard() {
       </motion.div>
 
       <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-lg font-bold text-card-foreground">Help & Support</h3>
             <p className="text-sm text-muted-foreground">
-              Need a hand with reports, reconciliation, or access issues? Support stays inside the dashboard.
+              Board users can get help without leaving the dashboard.
             </p>
           </div>
-          <Button asChild variant="outline" className="w-fit">
-            <a href="mailto:support@ledgerlink.demo">
-              <Mail className="mr-2 h-4 w-4" />
-              Email Support
-            </a>
+          <Button variant="outline" className="w-fit" onClick={() => alert("Support team notified.") }>
+            <LifeBuoy className="mr-2 h-4 w-4" />
+            Notify Support
           </Button>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              <h4 className="font-semibold text-card-foreground">Ask a question</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Send a quick note to the support queue.</p>
+            <Button variant="outline" className="w-full" onClick={() => alert("Chat draft opened in support queue.")}>Open Chat</Button>
+          </div>
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <PhoneCall className="h-4 w-4 text-primary" />
+              <h4 className="font-semibold text-card-foreground">Request a call</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Book a callback for board access or review questions.</p>
+            <Button variant="outline" className="w-full" onClick={() => alert("Callback request queued.")}>Request Callback</Button>
+          </div>
+          <div className="rounded-lg border border-border bg-background p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              <h4 className="font-semibold text-card-foreground">Email support</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Escalate detailed issues to the support mailbox.</p>
+            <Button asChild variant="outline" className="w-full">
+              <a href="mailto:support@ledgerlink.demo">Open Mail</a>
+            </Button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
