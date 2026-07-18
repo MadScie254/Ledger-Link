@@ -4,10 +4,14 @@
  */
 
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Contact } from "@/pages/Contact";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Onboarding } from "@/pages/Onboarding";
 import { Landing } from "@/pages/Landing";
 import { Pricing } from "@/pages/Pricing";
+import { Privacy } from "@/pages/Privacy";
+import { Terms } from "@/pages/Terms";
+import { NotFound } from "@/pages/NotFound";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
@@ -27,7 +31,11 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/app/*" element={<MainApp />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster richColors position="top-right" />
         </AuthProvider>
