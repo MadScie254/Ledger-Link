@@ -44,6 +44,15 @@ function RotatingWord() {
 }
 
 export function Landing() {
+  const revenueBars = [
+    { className: "h-[38%]" },
+    { className: "h-[48%]" },
+    { className: "h-[30%]" },
+    { className: "h-[64%]" },
+    { className: "h-[54%]" },
+    { className: "h-[72%]" },
+  ];
+
   const featureCards = [
     {
       icon: CircleDollarSign,
@@ -162,7 +171,7 @@ export function Landing() {
       <PublicHeader />
 
       <main>
-        <section className="relative overflow-hidden px-6 pb-20 pt-18 sm:pt-20 lg:pt-24">
+        <section className="relative overflow-hidden px-6 pb-20 pt-20 sm:pt-20 lg:pt-24">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.16),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.14),_transparent_30%),linear-gradient(to_bottom,_#f8fafc,_#ffffff_54%,_#f8fafc)]" />
           <div className="mx-auto flex max-w-7xl flex-col items-center text-center">
             <Badge className="mb-6 rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
@@ -278,12 +287,9 @@ export function Landing() {
                           <Clock3 className="h-5 w-5 text-slate-400" />
                         </div>
                         <div className="grid grid-cols-6 gap-3">
-                          {[38, 48, 30, 64, 54, 72].map((value, index) => (
+                          {revenueBars.map((bar, index) => (
                             <div key={index} className="flex h-36 items-end rounded-2xl bg-slate-50 p-2">
-                              <div
-                                className="w-full rounded-xl bg-gradient-to-t from-primary to-emerald-500"
-                                style={{ height: `${value}%` }}
-                              />
+                              <div className={`w-full rounded-xl bg-gradient-to-t from-primary to-emerald-500 ${bar.className}`} />
                             </div>
                           ))}
                         </div>
