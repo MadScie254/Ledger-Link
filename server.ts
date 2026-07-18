@@ -34,7 +34,7 @@ ${JSON.stringify(context)}
 Keep your answers concise, formatting numbers as currency where appropriate. If the user asks something unrelated to their finances or Ledger-Link, gently guide them back.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.0-flash',
         contents: message,
         config: {
           systemInstruction: systemInstruction,
@@ -42,10 +42,11 @@ Keep your answers concise, formatting numbers as currency where appropriate. If 
       });
 
       res.json({ text: response.text });
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Chat Error:", error);
-      res.status(500).json({ error: "Failed to process AI request." });
+      res.status(500).json({ error: "Failed to process AI request.", details: error?.message || String(error) });
     }
+
   });
 
   // M-Pesa Webhook & Payments
