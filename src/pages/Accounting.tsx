@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet, Receipt, Plus, CreditCard } from "lucide-react";
@@ -23,8 +24,10 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
+import { ShieldCheck } from "lucide-react";
 
 export function Accounting() {
+  const { role } = useAuth();
   const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, updateBillStatus, accounts, invoices, updateInvoiceStatus } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"mpesa" | "bank" | "bills">("mpesa");
@@ -39,8 +42,15 @@ export function Accounting() {
   const [newBillCategory, setNewBillCategory] = useState("Office Supplies");
   const [newBillNotes, setNewBillNotes] = useState("");
   const [newBillReceipt, setNewBillReceipt] = useState<File | null>(null);
+  const isReadOnly = role === "board";
+  const unmatchedMpesa = mpesaTransactions.filter((tx) => tx.status !== "Matched").length;
+  const unmatchedBank = bankTransactions.filter((tx) => tx.status !== "Matched").length;
 
   const handleAddBill = () => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     if (!newBillVendor.trim() || !newBillAccount || !newBillAmount || !newBillDueDate) {
       toast.error("Please fill in all required fields.");
       return;
@@ -70,6 +80,10 @@ export function Accounting() {
   };
 
   const handleMatch = (type: "mpesa" | "bank", id: string) => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     if (type === "mpesa") {
       updateMpesaTransaction(id, { status: "Matched" });
     } else {
@@ -101,6 +115,10 @@ export function Accounting() {
   };
 
   const handleAutoMatch = () => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     let matchCount = 0;
 
     mpesaTransactions.forEach(t => {
@@ -186,8 +204,14 @@ export function Accounting() {
             Reconcile payments with bank feeds and M-Pesa statements.
           </p>
         </div>
+        {isReadOnly && (
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Board role is read-only
+          </div>
+        )}
         <div className="flex gap-3">
-          {activeTab === "bills" && (
+          {activeTab === "bills" && !isReadOnly && (
             <Dialog open={isAddBillOpen} onOpenChange={setIsAddBillOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -280,7 +304,7 @@ export function Accounting() {
               Export Reports
             </Button>
           )}
-          {activeTab !== "bills" && (
+          {activeTab !== "bills" && !isReadOnly && (
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleAutoMatch}>
               <ArrowRightLeft className="mr-2 h-4 w-4" />
               Run Auto-Match
@@ -340,6 +364,11 @@ export function Accounting() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TableRow className="bg-muted/30">
+                  <TableCell colSpan={6} className="py-3 text-sm text-muted-foreground">
+                    {mpesaTransactions.length - unmatchedMpesa} matched, {unmatchedMpesa} unmatched
+                  </TableCell>
+                </TableRow>
                 {mpesaTransactions.map((tx) => (
                   <TableRow key={tx.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium text-primary">{tx.id}</TableCell>
@@ -358,7 +387,7 @@ export function Accounting() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      {tx.status !== "Matched" && (
+                      {tx.status !== "Matched" && !isReadOnly && (
                         <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleMatch("mpesa", tx.id)}>
                           <FileCheck className="h-4 w-4 mr-1" /> Match
                         </Button>
@@ -393,6 +422,11 @@ export function Accounting() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TableRow className="bg-muted/30">
+                  <TableCell colSpan={6} className="py-3 text-sm text-muted-foreground">
+                    {bankTransactions.length - unmatchedBank} matched, {unmatchedBank} unmatched
+                  </TableCell>
+                </TableRow>
                 {bankTransactions.map((tx) => (
                   <TableRow key={tx.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium text-primary">{tx.id}</TableCell>
@@ -411,7 +445,7 @@ export function Accounting() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      {tx.status !== "Matched" && (
+                      {tx.status !== "Matched" && !isReadOnly && (
                         <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => handleMatch("bank", tx.id)}>
                           <FileCheck className="h-4 w-4 mr-1" /> Match
                         </Button>
@@ -480,7 +514,7 @@ export function Accounting() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {bill.status === "Unpaid" && (
+                        {bill.status === "Unpaid" && !isReadOnly && (
                           <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => updateBillStatus(bill.id, "Paid")}>
                             <FileCheck className="h-4 w-4 mr-1" /> Mark Paid
                           </Button>

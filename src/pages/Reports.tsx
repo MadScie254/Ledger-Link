@@ -1,17 +1,18 @@
 import { useAppStore } from "@/store/useAppStore";
+import { useAuth } from "@/contexts/AuthContext";
 import { useMemo, useState, useEffect } from "react";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, ReceiptText, ShieldCheck } from "lucide-react";
 
 function ReportsSkeleton() {
   return (
@@ -42,16 +43,17 @@ function ReportsSkeleton() {
 }
 
 export function Reports() {
+  const { role } = useAuth();
   const { invoices, bills, payrollHistory, accounts } = useAppStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
 
-  const { incomeGroups, expenseGroups, totalIncome, totalExpense, netIncome, chartData } = useMemo(() => {
-    // 1. Calculate Income (Paid Invoices)
+  const { incomeGroups, expenseGroups, totalIncome, totalExpense, netIncome, chartData, vatCollected, vatPaid, netVat, kraRows } = useMemo(() => {
     const paidInvoices = invoices.filter(inv => inv.status === "Paid");
     const incomeAccs: Record<string, number> = {};
     let tIncome = 0;
@@ -66,7 +68,6 @@ export function Reports() {
 
     const incomeGroups = Object.entries(incomeAccs).map(([name, amount]) => ({ name, amount }));
 
-    // 2. Calculate Expenses (Paid Bills + Payroll)
     const paidBills = bills.filter(b => b.status === "Paid");
     const expenseAccs: Record<string, number> = {};
     let tExpense = 0;
@@ -77,7 +78,6 @@ export function Reports() {
       tExpense += b.amount;
     });
 
-    // Add Payroll
     const latestPayroll = payrollHistory[payrollHistory.length - 1];
     if (latestPayroll) {
       const payrollAccName = accounts.find(a => a.name.includes("Payroll"))?.name || "Payroll Expense";
@@ -86,16 +86,38 @@ export function Reports() {
     }
 
     const expenseGroups = Object.entries(expenseAccs).map(([name, amount]) => ({ name, amount }));
-
     const nIncome = tIncome - tExpense;
 
-    // Chart Data (Income vs Expense)
+    const taxableInvoices = paidInvoices.filter((inv) => inv.taxRate === 16);
+    const vatCollectedValue = taxableInvoices.reduce((sum, inv) => sum + (inv.rawAmount - inv.rawAmount / 1.16), 0);
+    const vatPaidValue = paidBills.reduce((sum, bill) => sum + (bill.amount * 0.16), 0);
+    const netVatValue = vatCollectedValue - vatPaidValue;
+
+    const kraRows = [
+      { label: "Taxable Supplies @ 16%", value: taxableInvoices.reduce((sum, inv) => sum + inv.rawAmount, 0), kind: "output" as const },
+      { label: "Output VAT Collected", value: vatCollectedValue, kind: "output" as const },
+      { label: "Purchases / Expenses", value: paidBills.reduce((sum, bill) => sum + bill.amount, 0), kind: "input" as const },
+      { label: "Input VAT Paid", value: vatPaidValue, kind: "input" as const },
+      { label: netVatValue >= 0 ? "Net VAT Payable" : "Net VAT Refundable", value: Math.abs(netVatValue), kind: netVatValue >= 0 ? "payable" as const : "refund" as const },
+    ];
+
     const cData = [
       { name: "Income", value: tIncome, color: "#10b981" },
       { name: "Expenses", value: tExpense, color: "#f43f5e" }
     ];
 
-    return { incomeGroups, expenseGroups, totalIncome: tIncome, totalExpense: tExpense, netIncome: nIncome, chartData: cData };
+    return {
+      incomeGroups,
+      expenseGroups,
+      totalIncome: tIncome,
+      totalExpense: tExpense,
+      netIncome: nIncome,
+      chartData: cData,
+      vatCollected: vatCollectedValue,
+      vatPaid: vatPaidValue,
+      netVat: netVatValue,
+      kraRows,
+    };
   }, [invoices, bills, payrollHistory, accounts]);
 
   if (isLoading) return <ReportsSkeleton />;
@@ -104,129 +126,175 @@ export function Reports() {
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
       <div className="flex items-end justify-between shrink-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">
-            Reports
-          </h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Reports</h2>
           <p className="text-sm text-muted-foreground">
-            Basic financial overview and Income Statement.
+            Financial overview, tax compliance, and leadership-ready summaries.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
-        {/* Income Statement Table */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-border bg-muted/20 shrink-0">
-            <h3 className="font-semibold text-card-foreground">Income Statement</h3>
-            <p className="text-xs text-muted-foreground">For the current period</p>
-          </div>
-          <div className="overflow-auto flex-1 p-0">
-            <Table>
-              <TableBody>
-                {/* INCOME SECTION */}
-                <TableRow className="bg-success/5 dark:bg-success/10 hover:bg-success/5 dark:hover:bg-success/10">
-                  <TableCell colSpan={2} className="font-bold text-success py-3 uppercase text-xs tracking-wider">
-                    Income
-                  </TableCell>
-                </TableRow>
-                {incomeGroups.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center py-8">
-                      <EmptyState 
-                        icon={TrendingUp} 
-                        message="No income data found." 
-                      />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  incomeGroups.map((g, i) => (
-                    <TableRow key={i} className="hover:bg-muted/30">
-                      <TableCell className="pl-6 font-medium">{g.name}</TableCell>
-                      <TableCell className="text-right">KES {g.amount.toLocaleString()}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-                <TableRow className="bg-muted/10 hover:bg-muted/10 border-b-2 border-border">
-                  <TableCell className="font-bold pl-6">Total Income</TableCell>
-                  <TableCell className="text-right font-bold text-success">KES {totalIncome.toLocaleString()}</TableCell>
-                </TableRow>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-4 flex-1 min-h-0">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tax">Tax & Compliance</TabsTrigger>
+        </TabsList>
 
-                {/* EXPENSE SECTION */}
-                <TableRow className="bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
-                  <TableCell colSpan={2} className="font-bold text-rose-800 dark:text-rose-400 py-3 uppercase text-xs tracking-wider border-t border-border">
-                    Expenses
-                  </TableCell>
-                </TableRow>
-                {expenseGroups.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center py-8">
-                      <EmptyState 
-                        icon={TrendingDown} 
-                        message="No expense data found." 
-                      />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  expenseGroups.map((g, i) => (
-                    <TableRow key={i} className="hover:bg-muted/30">
-                      <TableCell className="pl-6 font-medium">{g.name}</TableCell>
-                      <TableCell className="text-right">KES {g.amount.toLocaleString()}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-                <TableRow className="bg-muted/10 hover:bg-muted/10 border-b-2 border-border">
-                  <TableCell className="font-bold pl-6">Total Expenses</TableCell>
-                  <TableCell className="text-right font-bold text-rose-600 dark:text-rose-400">KES {totalExpense.toLocaleString()}</TableCell>
-                </TableRow>
-
-                {/* NET INCOME */}
-                <TableRow className={netIncome >= 0 ? "bg-success/10 dark:bg-success/20 hover:bg-success/10 dark:hover:bg-success/20" : "bg-destructive/10 dark:bg-destructive/20 hover:bg-destructive/10 dark:hover:bg-destructive/20"}>
-                  <TableCell className="font-bold py-4">Net Income (Loss)</TableCell>
-                  <TableCell className={`text-right font-extrabold text-lg py-4 ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    KES {netIncome.toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Visual Summary */}
-        <div className="rounded-xl border border-border bg-card shadow-sm p-6 flex flex-col">
-          <h3 className="font-semibold text-card-foreground mb-6">Income vs Expenses</h3>
-          <div className="flex-1 min-h-[250px] relative">
-            {(totalIncome > 0 || totalExpense > 0) ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    formatter={(value: number) => `KES ${value.toLocaleString()}`}
-                    contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground italic">
-                No data to display
+        <TabsContent value="overview" className="m-0 flex-1 min-h-0 data-[state=inactive]:hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+            <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-border bg-muted/20 shrink-0">
+                <h3 className="font-semibold text-card-foreground">Income Statement</h3>
+                <p className="text-xs text-muted-foreground">For the current period</p>
               </div>
-            )}
+              <div className="overflow-auto flex-1 p-0">
+                <Table>
+                  <TableBody>
+                    <TableRow className="bg-success/5 dark:bg-success/10 hover:bg-success/5 dark:hover:bg-success/10">
+                      <TableCell colSpan={2} className="font-bold text-success py-3 uppercase text-xs tracking-wider">Income</TableCell>
+                    </TableRow>
+                    {incomeGroups.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={2} className="text-center py-8">
+                          <EmptyState icon={TrendingUp} message="No income data found." />
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      incomeGroups.map((g, i) => (
+                        <TableRow key={i} className="hover:bg-muted/30">
+                          <TableCell className="pl-6 font-medium">{g.name}</TableCell>
+                          <TableCell className="text-right">KES {g.amount.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                    <TableRow className="bg-muted/10 hover:bg-muted/10 border-b-2 border-border">
+                      <TableCell className="font-bold pl-6">Total Income</TableCell>
+                      <TableCell className="text-right font-bold text-success">KES {totalIncome.toLocaleString()}</TableCell>
+                    </TableRow>
+
+                    <TableRow className="bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
+                      <TableCell colSpan={2} className="font-bold text-rose-800 dark:text-rose-400 py-3 uppercase text-xs tracking-wider border-t border-border">Expenses</TableCell>
+                    </TableRow>
+                    {expenseGroups.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={2} className="text-center py-8">
+                          <EmptyState icon={TrendingDown} message="No expense data found." />
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      expenseGroups.map((g, i) => (
+                        <TableRow key={i} className="hover:bg-muted/30">
+                          <TableCell className="pl-6 font-medium">{g.name}</TableCell>
+                          <TableCell className="text-right">KES {g.amount.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                    <TableRow className="bg-muted/10 hover:bg-muted/10 border-b-2 border-border">
+                      <TableCell className="font-bold pl-6">Total Expenses</TableCell>
+                      <TableCell className="text-right font-bold text-rose-600 dark:text-rose-400">KES {totalExpense.toLocaleString()}</TableCell>
+                    </TableRow>
+
+                    <TableRow className={netIncome >= 0 ? "bg-success/10 dark:bg-success/20 hover:bg-success/10 dark:hover:bg-success/20" : "bg-destructive/10 dark:bg-destructive/20 hover:bg-destructive/10 dark:hover:bg-destructive/20"}>
+                      <TableCell className="font-bold py-4">Net Income (Loss)</TableCell>
+                      <TableCell className={`text-right font-extrabold text-lg py-4 ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
+                        KES {netIncome.toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card shadow-sm p-6 flex flex-col">
+              <h3 className="font-semibold text-card-foreground mb-6">Income vs Expenses</h3>
+              <div className="flex-1 min-h-[250px] relative">
+                {(totalIncome > 0 || totalExpense > 0) ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip 
+                        formatter={(value) => `KES ${Number(value ?? 0).toLocaleString()}`}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}
+                      />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground italic">No data to display</div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="tax" className="m-0 flex-1 min-h-0 data-[state=inactive]:hidden">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="rounded-xl border border-border bg-card shadow-sm p-6 xl:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">KRA iTax Summary</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">VAT Collected</p>
+                  <p className="text-2xl font-bold text-emerald-600">KES {vatCollected.toLocaleString()}</p>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/20 p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">VAT Paid</p>
+                  <p className="text-2xl font-bold text-sky-600">KES {vatPaid.toLocaleString()}</p>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/20 p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Net Position</p>
+                  <p className={`text-2xl font-bold ${netVat >= 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                    KES {Math.abs(netVat).toLocaleString()} {netVat >= 0 ? "Payable" : "Refundable"}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground leading-5">
+                Summary is auto-calculated from paid 16% VAT-rated invoices and paid supplier bills. Adjust upstream tax settings for filing precision.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden xl:col-span-2">
+              <div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-card-foreground">VAT Return Detail</h3>
+                  <p className="text-xs text-muted-foreground">Formatted for quick review before filing</p>
+                </div>
+                <Badge variant="outline" className="gap-1">
+                  <ReceiptText className="h-3.5 w-3.5" />
+                  16% VAT
+                </Badge>
+              </div>
+              <Table>
+                <TableBody>
+                  {kraRows.map((row) => (
+                    <TableRow key={row.label}>
+                      <TableCell className="font-medium">{row.label}</TableCell>
+                      <TableCell className="text-right">KES {row.value.toLocaleString()}</TableCell>
+                      <TableCell className="text-right w-[140px]">
+                        {row.kind === "payable" ? <Badge className="bg-rose-600">Payable</Badge> : row.kind === "refund" ? <Badge className="bg-emerald-600">Refundable</Badge> : <Badge variant="secondary">KRA Line</Badge>}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
