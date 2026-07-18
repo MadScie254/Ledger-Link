@@ -40,49 +40,55 @@ src/
 
 ## Technology Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| Framework | React | 19 |
-| Language | TypeScript | 5.8 |
-| Styling | Tailwind CSS | 4 |
-| UI Primitives | shadcn/ui + Radix UI | Latest |
-| Icons | Lucide React | 0.546 |
-| Charts | Recharts | 3.9 |
-| State | Zustand | 5.0 |
-| Routing | React Router DOM | 7.18 |
-| PDF | jsPDF | 4.2 |
-| AI | @google/genai (Gemini) | 2.4 |
-| Fonts | Inter via @fontsource-variable | — |
-| Build | Vite | 6.2 |
+| Layer         | Technology                     | Version |
+| ------------- | ------------------------------ | ------- |
+| Framework     | React                          | 19      |
+| Language      | TypeScript                     | 5.8     |
+| Styling       | Tailwind CSS                   | 4       |
+| UI Primitives | shadcn/ui + Radix UI           | Latest  |
+| Icons         | Lucide React                   | 0.546   |
+| Charts        | Recharts                       | 3.9     |
+| State         | Zustand                        | 5.0     |
+| Routing       | React Router DOM               | 7.18    |
+| PDF           | jsPDF                          | 4.2     |
+| AI            | @google/genai (Gemini)         | 2.4     |
+| Fonts         | Inter via @fontsource-variable | —      |
+| Build         | Vite                           | 6.2     |
 
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js ≥ 18
 - npm ≥ 9
 
 ### Install & Run
+
 ```bash
 npm install
 npm run dev
 ```
 
 ### Environment Variables
+
 Copy `.env.example` to `.env`:
+
 ```bash
 cp .env.example .env
 ```
 
-| Variable | Required | Description |
-|---|---|---|
+| Variable           | Required | Description                                |
+| ------------------ | -------- | ------------------------------------------ |
 | `GEMINI_API_KEY` | Optional | Google Gemini API key for the AI Assistant |
 
 > The AI Assistant is a nice-to-have feature. The app works fully without it — you'll just see a "can't connect" message in the chat panel.
 
 ### Build for Production
+
 ```bash
 npm run build
 ```
+
 Output goes to `dist/`. Deploy to any static host (Cloudflare Pages, Vercel, Netlify).
 
 ## Design System
@@ -91,14 +97,15 @@ LedgerLink defines semantic color tokens in `src/index.css` using the **oklch** 
 
 ### Color Tokens
 
-| Token | Light Mode | Dark Mode | Usage |
-|---|---|---|---|
-| `--primary` | Deep teal | Lighter teal | Brand, buttons, active nav |
-| `--success` | Green (hue 155) | Lighter green | Paid, active, positive |
-| `--warning` | Amber (hue 80) | Lighter amber | Pending, overdue, low stock |
-| `--destructive` | Red | Lighter red | Errors, deletions |
+| Token             | Light Mode      | Dark Mode     | Usage                       |
+| ----------------- | --------------- | ------------- | --------------------------- |
+| `--primary`     | Deep teal       | Lighter teal  | Brand, buttons, active nav  |
+| `--success`     | Green (hue 155) | Lighter green | Paid, active, positive      |
+| `--warning`     | Amber (hue 80)  | Lighter amber | Pending, overdue, low stock |
+| `--destructive` | Red             | Lighter red   | Errors, deletions           |
 
 ### Usage Examples
+
 ```tsx
 // ✅ Correct — semantic token
 <Badge className="bg-success/10 text-success">Paid</Badge>
@@ -111,7 +118,7 @@ LedgerLink defines semantic color tokens in `src/index.css` using the **oklch** 
 
 The app uses a two-tier routing system:
 
-```
+```TypeScript
 / .............. Landing.tsx      (public)
 /pricing ....... Pricing.tsx      (public)
 /app/* ......... MainApp          (private — onboarding gate)
