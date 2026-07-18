@@ -16,6 +16,7 @@ export interface OrgProfile {
   name: string;
   sector: string;
   qbConnected: boolean;
+  primaryColor?: string;
 }
 
 export interface MovementLogEntry {

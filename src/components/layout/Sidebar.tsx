@@ -10,18 +10,19 @@ import {
   PieChart,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppStore } from "@/store/useAppStore";
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["owner", "finance", "board"] },
-  { name: "Clients", href: "/clients", icon: Users, roles: ["owner", "finance"] },
-  { name: "Invoicing", href: "/invoicing", icon: FileText, roles: ["owner", "finance"] },
-  { name: "Payroll", href: "/payroll", icon: Users, roles: ["owner", "finance"] },
-  { name: "Inventory", href: "/inventory", icon: Package, roles: ["owner", "finance", "board"] },
-  { name: "Accounting", href: "/accounting", icon: LineChart, roles: ["owner", "finance", "board"] },
-  { name: "Reports", href: "/reports", icon: PieChart, roles: ["owner", "finance", "board"] },
-  { name: "Settings", href: "/settings", icon: Settings, roles: ["owner"] },
+  { name: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard, roles: ["owner", "finance", "board"] },
+  { name: "Clients", href: "/app/clients", icon: Users, roles: ["owner", "finance"] },
+  { name: "Invoicing", href: "/app/invoicing", icon: FileText, roles: ["owner", "finance"] },
+  { name: "Payroll", href: "/app/payroll", icon: Users, roles: ["owner", "finance"] },
+  { name: "Inventory", href: "/app/inventory", icon: Package, roles: ["owner", "finance", "board"] },
+  { name: "Accounting", href: "/app/accounting", icon: LineChart, roles: ["owner", "finance", "board"] },
+  { name: "Reports", href: "/app/reports", icon: PieChart, roles: ["owner", "finance", "board"] },
+  { name: "Settings", href: "/app/settings", icon: Settings, roles: ["owner"] },
 ];
 
 interface SidebarProps {
@@ -31,6 +32,7 @@ interface SidebarProps {
 
 export function Sidebar({ isMobileOpen = false, setIsMobileOpen }: SidebarProps) {
   const { role, organization } = useAuth();
+  const { orgProfile } = useAppStore();
   const location = useLocation();
 
   // Auto-close mobile drawer on route change
@@ -44,11 +46,22 @@ export function Sidebar({ isMobileOpen = false, setIsMobileOpen }: SidebarProps)
   const sidebarContent = (
     <>
       <div className="flex items-center justify-between gap-3 p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sm">
-            LL
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sm">
+              LL
+            </div>
+            <h1 className="text-xl font-bold tracking-tight">LedgerLink</h1>
           </div>
-          <h1 className="text-xl font-bold tracking-tight">LedgerLink</h1>
+          <div className="flex items-center gap-2 mt-2 px-1">
+            <div 
+              className="h-2.5 w-2.5 rounded-full shrink-0" 
+              style={{ backgroundColor: orgProfile.primaryColor || '#10b981' }} 
+            />
+            <span className="text-sm font-medium text-muted-foreground truncate" title={orgProfile.name}>
+              {orgProfile.name}
+            </span>
+          </div>
         </div>
         {/* Close button for mobile only */}
         {setIsMobileOpen && (

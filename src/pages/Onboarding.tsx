@@ -10,13 +10,14 @@ export function Onboarding() {
   const [step, setStep] = useState(1);
   const [tempName, setTempName] = useState(orgProfile.name);
   const [tempSector, setTempSector] = useState(orgProfile.sector);
+  const [tempColor, setTempColor] = useState(orgProfile.primaryColor || "#10b981");
 
   const handleNextStep1 = () => {
     if (!tempName.trim()) {
       toast.error("Organization name is required");
       return;
     }
-    setOrgProfile({ name: tempName, sector: tempSector });
+    setOrgProfile({ name: tempName, sector: tempSector, primaryColor: tempColor });
     setStep(2);
   };
 
@@ -65,6 +66,18 @@ export function Onboarding() {
                   <option>Hospital / Clinic</option>
                   <option>Other</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Brand Color (Optional)</label>
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="color" 
+                    value={tempColor}
+                    onChange={(e) => setTempColor(e.target.value)}
+                    className="h-10 w-16 p-1 cursor-pointer rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <span className="text-sm text-muted-foreground">Used for PDF invoices and sidebar accent</span>
+                </div>
               </div>
             </div>
             <Button className="w-full" onClick={handleNextStep1}>Continue</Button>

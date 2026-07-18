@@ -2,6 +2,15 @@ import { jsPDF } from "jspdf";
 import { OrgProfile } from "@/store/useAppStore";
 import { PayrollBreakdown } from "./calculatePayroll";
 
+const hexToRgb = (hex: string): [number, number, number] => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+  ] : [34, 197, 94]; // fallback to emerald-500
+};
+
 export function generatePayslipPDF(
   employee: { id: string; name: string; role: string; gross: number },
   deductions: PayrollBreakdown,
@@ -12,7 +21,7 @@ export function generatePayslipPDF(
   
   // Organization Header
   doc.setFontSize(22);
-  doc.setTextColor(34, 197, 94); // emerald-500
+  doc.setTextColor(...hexToRgb(orgProfile.primaryColor || '#10b981'));
   doc.text(orgProfile.name, 20, 20);
   
   doc.setFontSize(12);

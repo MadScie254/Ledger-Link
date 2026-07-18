@@ -24,7 +24,7 @@ export function AppLayout() {
         <main className="flex-1 overflow-y-auto p-8 relative">
           <ErrorBoundary>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
               <Route path="/dashboard/*" element={<Dashboard />} />
               <Route path="/clients/*" element={<Clients />} />
               <Route path="/invoicing/*" element={<Invoicing />} />
