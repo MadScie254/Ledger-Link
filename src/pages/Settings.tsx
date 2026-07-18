@@ -24,6 +24,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, LifeBuoy, Mail, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
+import { pageItem, pageStagger } from "@/lib/motion";
 
 type TeamRole = "Owner" | "Finance" | "Board";
 
@@ -38,6 +40,7 @@ type TeamMember = {
 export function Settings() {
   const { role, setRole } = useAuth();
   const { orgProfile, setOrgProfile, accounts, addAccount } = useAppStore();
+  const isReadOnly = role === "board";
   
   const [name, setName] = useState(orgProfile.name);
   const [sector, setSector] = useState(orgProfile.sector);
@@ -77,17 +80,29 @@ export function Settings() {
   }, [searchParams, setSearchParams]);
 
   const handleSaveProfile = () => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     setOrgProfile({ name, sector });
     toast.success("Organization profile updated");
   };
 
   const handleToggleQB = () => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     const newState = !orgProfile.qbConnected;
     setOrgProfile({ qbConnected: newState });
     toast.success(`QuickBooks ${newState ? 'Connected' : 'Disconnected'}`);
   };
 
   const handleAddAccount = () => {
+    if (isReadOnly) {
+      toast.error("Board members have read-only access.");
+      return;
+    }
     if (!newAccountName.trim()) { toast.error("Account name is required"); return; }
     addAccount({ name: newAccountName.trim(), type: newAccountType });
     toast.success("Account added successfully");
@@ -133,6 +148,12 @@ export function Settings() {
             Manage your organization and account preferences.
           </p>
         </div>
+        {isReadOnly && (
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Board role is read-only
+          </div>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-4 flex-1 min-h-0">
@@ -141,9 +162,9 @@ export function Settings() {
           <TabsTrigger value="team">Team</TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-y-auto space-y-6">
+        <motion.div className="flex-1 overflow-y-auto space-y-6" variants={pageStagger}>
           <TabsContent value="profile" className="m-0 space-y-6 data-[state=inactive]:hidden">
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
           <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Organization Profile</h3>
           
           <div className="space-y-4 max-w-md">
@@ -153,6 +174,7 @@ export function Settings() {
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isReadOnly}
                 className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
               />
             </div>
@@ -161,6 +183,7 @@ export function Settings() {
               <select 
                 value={sector}
                 onChange={(e) => setSector(e.target.value)}
+                disabled={isReadOnly}
                 className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option>School</option>
@@ -170,11 +193,11 @@ export function Settings() {
                 <option>Other</option>
               </select>
             </div>
-            <Button onClick={handleSaveProfile} className="mt-2">Save Profile</Button>
+            <Button onClick={handleSaveProfile} className="mt-2" disabled={isReadOnly}>Save Profile</Button>
           </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
               <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Help & Support</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Need assistance with your account or have a question about LedgerLink?
@@ -185,9 +208,9 @@ export function Settings() {
                   Contact Support
                 </Button>
               </Link>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col max-h-[600px]">
+            <motion.div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col max-h-[600px]" variants={pageItem}>
           <div className="p-6 border-b border-border flex items-center justify-between shrink-0">
             <div>
               <h3 className="text-lg font-semibold text-card-foreground">Chart of Accounts</h3>
@@ -195,7 +218,7 @@ export function Settings() {
             </div>
             <Dialog open={isAddAccountOpen} onOpenChange={setIsAddAccountOpen}>
               <DialogTrigger asChild>
-                <Button size="sm">
+                  <Button size="sm" disabled={isReadOnly}>
                   <Plus className="mr-2 h-4 w-4" /> Add Account
                 </Button>
               </DialogTrigger>
@@ -210,6 +233,7 @@ export function Settings() {
                     <input 
                       value={newAccountName} 
                       onChange={(e) => setNewAccountName(e.target.value)} 
+                      disabled={isReadOnly}
                       className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" 
                       placeholder="e.g. Marketing Expense" 
                     />
@@ -219,6 +243,7 @@ export function Settings() {
                     <select 
                       value={newAccountType} 
                       onChange={(e) => setNewAccountType(e.target.value as any)} 
+                      disabled={isReadOnly}
                       className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     >
                       <option value="Income">Income</option>
@@ -232,7 +257,7 @@ export function Settings() {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button onClick={handleAddAccount}>Save Account</Button>
+                  <Button onClick={handleAddAccount} disabled={isReadOnly}>Save Account</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -286,9 +311,9 @@ export function Settings() {
               </TableBody>
             </Table>
           </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
               <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Integrations</h3>
               <div className="flex items-center justify-between max-w-md p-4 border border-border rounded-lg bg-background">
                 <div>
@@ -300,14 +325,15 @@ export function Settings() {
                 <Button 
                   variant={orgProfile.qbConnected ? "outline" : "default"} 
                   onClick={handleToggleQB}
+                  disabled={isReadOnly}
                   className={orgProfile.qbConnected ? "text-destructive hover:bg-destructive/10" : "bg-emerald-600 hover:bg-emerald-700"}
                 >
                   {orgProfile.qbConnected ? 'Disconnect' : 'Connect'}
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
               <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Demo Role Switcher</h3>
               <p className="mb-4 text-sm text-muted-foreground">
                 Switch roles to see different dashboard views based on RBAC.
@@ -316,25 +342,28 @@ export function Settings() {
                 <Button 
                   variant={role === "owner" ? "default" : "outline"}
                   onClick={() => { setRole("owner"); toast.info("Switched to Owner role"); }}
+                  disabled={isReadOnly}
                 >
                   Owner
                 </Button>
                 <Button 
                   variant={role === "finance" ? "default" : "outline"}
                   onClick={() => { setRole("finance"); toast.info("Switched to Finance Staff role"); }}
+                  disabled={isReadOnly}
                 >
                   Finance Staff
                 </Button>
                 <Button 
                   variant={role === "board" ? "default" : "outline"}
                   onClick={() => { setRole("board"); toast.info("Switched to Board Member role"); }}
+                  disabled={isReadOnly}
                 >
                   Board Member
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-destructive/30 bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-destructive/30 bg-card p-6 shadow-sm" variants={pageItem}>
               <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Reset Demo Data</h3>
               <p className="mb-4 text-sm text-muted-foreground">
                 Clear all saved state and restore the original mock data. This is useful for resetting between client demos.
@@ -342,6 +371,7 @@ export function Settings() {
               <Button 
                 variant="outline" 
                 className="text-destructive hover:bg-destructive/10 border-destructive/30"
+                disabled={isReadOnly}
                 onClick={() => {
                   localStorage.removeItem('ledgerlink-app-store');
                   toast.success("Demo data reset. Reloading...");
@@ -350,11 +380,11 @@ export function Settings() {
               >
                 Reset Demo Data
               </Button>
-            </div>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="team" className="m-0 space-y-6 data-[state=inactive]:hidden">
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
               <div className="flex items-center justify-between gap-4 border-b border-border pb-2 mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-card-foreground">Team</h3>
@@ -412,9 +442,9 @@ export function Settings() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </TabsContent>
-        </div>
+        </motion.div>
       </Tabs>
     </div>
   );

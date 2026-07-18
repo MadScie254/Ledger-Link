@@ -14,6 +14,8 @@ import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { pageItem, pageStagger } from "@/lib/motion";
 import {
   Dialog,
   DialogContent,
@@ -187,7 +189,7 @@ function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenC
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Compliance</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-violet-500" /> Custom</div>
           </div>
-        </div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
@@ -429,8 +431,8 @@ export function DashboardOwner() {
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-hidden">
-      <div className="flex items-end justify-between shrink-0">
+    <motion.div className="flex h-full flex-col space-y-6 overflow-hidden" variants={pageStagger} initial="hidden" animate="show">
+      <motion.div className="flex items-end justify-between shrink-0" variants={pageItem}>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Morning, {isFinance ? "Finance Manager" : "Owner"}
@@ -447,10 +449,10 @@ export function DashboardOwner() {
             })()}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Hero Metric: Cash Position */}
-      <div className="rounded-xl border border-border bg-card p-8 shadow-sm shrink-0">
+      <motion.div className="rounded-xl border border-border bg-card p-8 shadow-sm shrink-0" variants={pageItem}>
         <p className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
           Cash Position
         </p>
@@ -460,18 +462,18 @@ export function DashboardOwner() {
             Live
           </span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-2 gap-4 shrink-0 lg:grid-cols-5">
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <motion.div className="grid grid-cols-2 gap-4 shrink-0 lg:grid-cols-5" variants={pageStagger}>
+        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.invoicedLabel}
           </p>
           <div className="flex items-end gap-1.5">
             <p className="text-xl font-bold text-card-foreground">{formatKES(totalInvoicedMTD)}</p>
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.arrearsLabel}
           </p>
@@ -483,8 +485,8 @@ export function DashboardOwner() {
               </span>
             )}
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Bookkeeping Health
           </p>
@@ -499,8 +501,8 @@ export function DashboardOwner() {
               </span>
             </div>
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Payroll Due
           </p>
@@ -510,8 +512,8 @@ export function DashboardOwner() {
               {staff.filter((s) => s.status === "Active").length} active staff
             </span>
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Inventory Alerts
           </p>
@@ -640,7 +642,7 @@ export function DashboardOwner() {
         <button onClick={() => setCalendarOpen(true)} className="px-4 py-1.5 bg-background text-primary rounded-lg text-xs font-bold hover:bg-muted transition-colors">
           View Calendar
         </button>
-      </div>
+      </motion.div>
 
       {/* Calendar Dialog */}
       <CalendarDialog open={calendarOpen} onOpenChange={setCalendarOpen} events={calendarEvents} />

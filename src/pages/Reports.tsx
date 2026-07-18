@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
 import { TrendingUp, TrendingDown, ReceiptText, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
+import { pageItem, pageStagger } from "@/lib/motion";
 
 function ReportsSkeleton() {
   return (
@@ -123,25 +125,27 @@ export function Reports() {
   if (isLoading) return <ReportsSkeleton />;
 
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-hidden">
-      <div className="flex items-end justify-between shrink-0">
+    <motion.div className="flex h-full flex-col space-y-6 overflow-hidden" variants={pageStagger} initial="hidden" animate="show">
+      <motion.div className="flex items-end justify-between shrink-0" variants={pageItem}>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">Reports</h2>
           <p className="text-sm text-muted-foreground">
             Financial overview, tax compliance, and leadership-ready summaries.
           </p>
         </div>
-      </div>
+      </motion.div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-4 flex-1 min-h-0">
-        <TabsList>
+        <motion.div variants={pageItem}>
+          <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tax">Tax & Compliance</TabsTrigger>
-        </TabsList>
+          </TabsList>
+        </motion.div>
 
         <TabsContent value="overview" className="m-0 flex-1 min-h-0 data-[state=inactive]:hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
-            <div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
+          <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden" variants={pageStagger}>
+            <motion.div className="lg:col-span-2 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col" variants={pageItem}>
               <div className="p-4 border-b border-border bg-muted/20 shrink-0">
                 <h3 className="font-semibold text-card-foreground">Income Statement</h3>
                 <p className="text-xs text-muted-foreground">For the current period</p>
@@ -202,9 +206,9 @@ export function Reports() {
                   </TableBody>
                 </Table>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card shadow-sm p-6 flex flex-col">
+            <motion.div className="rounded-xl border border-border bg-card shadow-sm p-6 flex flex-col" variants={pageItem}>
               <h3 className="font-semibold text-card-foreground mb-6">Income vs Expenses</h3>
               <div className="flex-1 min-h-[250px] relative">
                 {(totalIncome > 0 || totalExpense > 0) ? (
@@ -235,13 +239,13 @@ export function Reports() {
                   <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground italic">No data to display</div>
                 )}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </TabsContent>
 
         <TabsContent value="tax" className="m-0 flex-1 min-h-0 data-[state=inactive]:hidden">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="rounded-xl border border-border bg-card shadow-sm p-6 xl:col-span-1">
+          <motion.div className="grid grid-cols-1 xl:grid-cols-3 gap-6" variants={pageStagger}>
+            <motion.div className="rounded-xl border border-border bg-card shadow-sm p-6 xl:col-span-1" variants={pageItem}>
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold">KRA iTax Summary</h3>
@@ -265,9 +269,9 @@ export function Reports() {
               <p className="mt-4 text-xs text-muted-foreground leading-5">
                 Summary is auto-calculated from paid 16% VAT-rated invoices and paid supplier bills. Adjust upstream tax settings for filing precision.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden xl:col-span-2">
+            <motion.div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden xl:col-span-2" variants={pageItem}>
               <div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-card-foreground">VAT Return Detail</h3>
@@ -291,10 +295,10 @@ export function Reports() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

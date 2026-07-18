@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import { chartData } from "@/lib/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { pageItem, pageStagger } from "@/lib/motion";
 
 function BoardSkeleton() {
   return (
@@ -44,8 +46,8 @@ export function DashboardBoard() {
   if (isLoading) return <BoardSkeleton />;
 
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-hidden">
-      <div className="flex items-end justify-between shrink-0">
+    <motion.div className="flex h-full flex-col space-y-6 overflow-hidden" variants={pageStagger} initial="hidden" animate="show">
+      <motion.div className="flex items-end justify-between shrink-0" variants={pageItem}>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Morning, Board Member
@@ -54,10 +56,10 @@ export function DashboardBoard() {
             High-level financial summary and key performance indicators.
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <motion.div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-3" variants={pageStagger}>
+        <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Net Income (YTD)
           </p>
@@ -67,26 +69,26 @@ export function DashboardBoard() {
               +5% YoY
             </span>
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Current Assets
           </p>
           <div className="flex items-end gap-2">
             <p className="text-3xl font-bold text-card-foreground">KES 12.1M</p>
           </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        </motion.div>
+        <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Current Liabilities
           </p>
           <div className="flex items-end gap-2">
             <p className="text-3xl font-bold text-card-foreground">KES 4.2M</p>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="flex-1 flex flex-col rounded-xl border border-border bg-card p-8 shadow-sm">
+      <motion.div className="flex-1 flex flex-col rounded-xl border border-border bg-card p-8 shadow-sm" variants={pageItem}>
         <div className="mb-8 flex items-center justify-between shrink-0">
           <h3 className="text-lg font-bold text-card-foreground">
             Revenue vs Expenses Trend (Trailing 7 Months)
@@ -118,8 +120,8 @@ export function DashboardBoard() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

@@ -25,6 +25,8 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 import { ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
+import { pageItem, pageStagger } from "@/lib/motion";
 
 export function Accounting() {
   const { role } = useAuth();
@@ -194,8 +196,8 @@ export function Accounting() {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-hidden">
-      <div className="flex items-end justify-between shrink-0">
+    <motion.div className="flex h-full flex-col space-y-6 overflow-hidden" variants={pageStagger} initial="hidden" animate="show">
+      <motion.div className="flex items-end justify-between shrink-0" variants={pageItem}>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Accounting & Reconciliation
@@ -311,9 +313,9 @@ export function Accounting() {
             </Button>
           )}
         </div>
-      </div>
+      </motion.div>
       
-      <div className="flex items-center gap-2 shrink-0">
+      <motion.div className="flex items-center gap-2 shrink-0" variants={pageItem}>
         <button
           onClick={() => setActiveTab("mpesa")}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -347,11 +349,12 @@ export function Accounting() {
           <Receipt className="h-4 w-4" />
           Bills / Expenses
         </button>
-      </div>
+      </motion.div>
 
-      <div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col">
+      <motion.div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col" variants={pageItem}>
         <div className="overflow-auto flex-1">
           {activeTab === "mpesa" && (
+            <motion.div variants={pageItem} initial={false} animate="show">
             <Table>
               <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
                 <TableRow>
@@ -407,9 +410,11 @@ export function Accounting() {
                 )}
               </TableBody>
             </Table>
+            </motion.div>
           )}
 
           {activeTab === "bank" && (
+            <motion.div variants={pageItem} initial={false} animate="show">
             <Table>
               <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
                 <TableRow>
@@ -465,9 +470,11 @@ export function Accounting() {
                 )}
               </TableBody>
             </Table>
+            </motion.div>
           )}
 
           {activeTab === "bills" && (
+            <motion.div variants={pageItem} initial={false} animate="show">
             <Table>
               <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
                 <TableRow>
@@ -535,9 +542,10 @@ export function Accounting() {
                 )}
               </TableBody>
             </Table>
+            </motion.div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
