@@ -166,32 +166,6 @@ export function Landing() {
       color: "bg-rose-50 text-rose-700 border-rose-100",
     },
   ];
-  const tiers = [
-    {
-      name: "Starter",
-      price: "KES 2,500",
-      description: "Perfect for single organizations needing basic financial tracking.",
-      features: ["Core invoicing", "Basic payroll management", "Up to 50 clients", "Email support"],
-      cta: "Get started",
-      highlighted: false,
-    },
-    {
-      name: "Growth",
-      price: "KES 6,000",
-      description: "Ideal for growing organizations that need full visibility across finance and operations.",
-      features: ["Everything in Starter", "Inventory alerts", "Advanced reports", "QuickBooks sync", "Priority support"],
-      cta: "Get started",
-      highlighted: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      description: "For multi-branch organizations with complex requirements and onboarding needs.",
-      features: ["Everything in Growth", "Multi-branch support", "Custom feature development", "Dedicated account manager", "SLA support"],
-      cta: "Contact us",
-      highlighted: false,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -481,63 +455,7 @@ export function Landing() {
           </div>
         </section>
 
-        <section id="pricing" className="scroll-mt-24 px-6 py-24 bg-white border-y border-slate-200">
-          <div className="mx-auto max-w-7xl">
-            <div className="max-w-3xl text-center mx-auto">
-              <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">Pricing</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Simple, transparent pricing.</h2>
-              <p className="mt-4 text-lg leading-8 text-slate-600">
-                Choose the plan that fits your organization and move forward with a clearer path to setup. No long-term lock-in.
-              </p>
-            </div>
 
-            <div className="mt-14 grid gap-6 lg:grid-cols-3">
-              {tiers.map((tier) => (
-                <Card
-                  key={tier.name}
-                  className={`relative flex h-full flex-col border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-                    tier.highlighted ? "border-primary bg-white shadow-xl ring-1 ring-primary/15" : "bg-white"
-                  }`}
-                >
-                  {tier.highlighted && (
-                    <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
-                      <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground">
-                        Most popular
-                      </span>
-                    </div>
-                  )}
-
-                  <CardContent className="flex h-full flex-col p-8">
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-slate-950">{tier.name}</h2>
-                      <p className="mt-2 text-sm leading-7 text-slate-500">{tier.description}</p>
-                    </div>
-
-                    <div className="mb-8">
-                      <span className="text-4xl font-black tracking-tight text-slate-950">{tier.price}</span>
-                      {tier.price !== "Custom" && <span className="text-sm font-medium text-slate-500">/mo</span>}
-                    </div>
-
-                    <ul className="mb-8 space-y-4 flex-1">
-                      {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3">
-                          <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${tier.highlighted ? "text-primary" : "text-success"}`} />
-                          <span className="text-sm leading-6 text-slate-700">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Link to={tier.cta === "Contact us" ? "/contact" : "/auth?mode=signup"} className="mt-auto">
-                      <Button size="lg" className="h-12 w-full rounded-full text-base" variant={tier.highlighted ? "default" : "outline"}>
-                        {tier.cta}
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
 
         <section id="faq" className="scroll-mt-24 px-6 py-24 bg-slate-50">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">

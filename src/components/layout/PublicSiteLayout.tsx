@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/#faq" },
   { label: "Contact", href: "/contact" },
 ];
@@ -16,7 +16,7 @@ const footerColumns = [
     links: [
       { label: "Features", href: "/#features" },
       { label: "How it works", href: "/#how-it-works" },
-      { label: "Pricing", href: "/#pricing" },
+      { label: "Pricing", href: "/pricing" },
       { label: "Sectors", href: "/#sectors" },
     ],
   },
@@ -138,11 +138,11 @@ export function PublicFooter() {
             <Link to="/contact">
               <Button className="rounded-full px-5">Contact us</Button>
             </Link>
-            <a href="/#pricing" className="inline-flex">
+            <Link to="/pricing">
               <Button variant="outline" className="rounded-full border-white/20 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white">
                 View pricing
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

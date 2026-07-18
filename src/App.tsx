@@ -8,6 +8,7 @@ import { Contact } from "@/pages/Contact";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Onboarding } from "@/pages/Onboarding";
 import { Landing } from "@/pages/Landing";
+import { Pricing } from "@/pages/Pricing";
 import { Auth } from "@/pages/Auth";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
@@ -30,6 +31,7 @@ export default function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
