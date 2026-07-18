@@ -159,7 +159,7 @@ export function Inventory() {
                           </TableCell>
                           <TableCell className="font-medium">{m.itemName}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={m.delta > 0 ? "text-emerald-600 bg-emerald-50" : "text-amber-600 bg-amber-50"}>
+                            <Badge variant="outline" className={m.delta > 0 ? "text-success bg-success/10" : "text-warning bg-warning/10"}>
                               {m.delta > 0 ? '+' : ''}{m.delta}
                             </Badge>
                           </TableCell>
@@ -187,7 +187,7 @@ export function Inventory() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
         <div className="bg-card rounded-xl border border-border p-5 shadow-sm flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+          <div className="h-10 w-10 rounded-full bg-success/10 dark:bg-success/20 flex items-center justify-center text-success">
             <Plus className="h-5 w-5" />
           </div>
           <div>
@@ -196,7 +196,7 @@ export function Inventory() {
           </div>
         </div>
         <div className="bg-card rounded-xl border border-border p-5 shadow-sm flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+          <div className="h-10 w-10 rounded-full bg-warning/10 dark:bg-warning/20 flex items-center justify-center text-warning">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
@@ -251,11 +251,11 @@ export function Inventory() {
                     </TableCell>
                     <TableCell>
                       {isLowStock ? (
-                        <Badge variant="destructive" className="bg-amber-100 text-amber-800 border-none hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300">
+                        <Badge variant="destructive" className="bg-warning/10 text-warning border-none hover:bg-warning/20 dark:bg-warning/20 dark:text-warning">
                           Low Stock
                         </Badge>
                       ) : (
-                        <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <Badge variant="default" className="bg-success/10 text-success border-none hover:bg-success/20 dark:bg-success/20 dark:text-success">
                           In Stock
                         </Badge>
                       )}
@@ -274,7 +274,7 @@ export function Inventory() {
                             <option value="Correction">Correction</option>
                             <option value="Damaged/Expired">Damaged/Expired</option>
                           </select>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100" onClick={() => confirmAdjust(item)}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-success hover:text-success/80 hover:bg-success/10" onClick={() => confirmAdjust(item)}>
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={cancelAdjust}>

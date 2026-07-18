@@ -281,11 +281,11 @@ export function Accounting() {
                     <TableCell>KES {tx.amount.toLocaleString()}</TableCell>
                     <TableCell>
                       {tx.status === "Matched" ? (
-                        <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <Badge variant="default" className="bg-success/10 text-success border-none dark:bg-success/20 dark:text-success">
                           Matched
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                        <Badge variant="secondary" className="bg-warning/10 text-warning border-none dark:bg-warning/20 dark:text-warning">
                           Unmatched
                         </Badge>
                       )}
@@ -331,11 +331,11 @@ export function Accounting() {
                     <TableCell>KES {tx.amount.toLocaleString()}</TableCell>
                     <TableCell>
                       {tx.status === "Matched" ? (
-                        <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <Badge variant="default" className="bg-success/10 text-success border-none dark:bg-success/20 dark:text-success">
                           Matched
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                        <Badge variant="secondary" className="bg-warning/10 text-warning border-none dark:bg-warning/20 dark:text-warning">
                           Unmatched
                         </Badge>
                       )}
@@ -387,11 +387,11 @@ export function Accounting() {
                       <TableCell className="font-bold">KES {bill.amount.toLocaleString()}</TableCell>
                       <TableCell>
                         {bill.status === "Paid" ? (
-                          <Badge variant="default" className="bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300">
+                          <Badge variant="default" className="bg-success/10 text-success border-none dark:bg-success/20 dark:text-success">
                             Paid
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300">
+                          <Badge variant="secondary" className="bg-warning/10 text-warning border-none dark:bg-warning/20 dark:text-warning">
                             Unpaid
                           </Badge>
                         )}

@@ -182,8 +182,8 @@ function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenC
 
           {/* Legend */}
           <div className="flex gap-4 mt-4 pt-3 border-t border-border">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Invoice Due</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Payroll</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-warning" /> Invoice Due</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-success" /> Payroll</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Compliance</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-violet-500" /> Custom</div>
           </div>
@@ -332,7 +332,7 @@ export function DashboardOwner() {
           title: `${inv.id} due (${inv.client})`,
           date: key,
           type: "invoice-due",
-          color: inv.status === "Overdue" ? "bg-red-500" : "bg-amber-500"
+          color: inv.status === "Overdue" ? "bg-destructive" : "bg-warning"
         });
       }
     });
@@ -342,7 +342,7 @@ export function DashboardOwner() {
       const parsed = new Date(ph.disbursedAt);
       if (!isNaN(parsed.getTime())) {
         const key = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
-        events.push({ id: `pay-${ph.id}`, title: `Payroll: ${ph.period}`, date: key, type: "payroll", color: "bg-emerald-500" });
+        events.push({ id: `pay-${ph.id}`, title: `Payroll: ${ph.period}`, date: key, type: "payroll", color: "bg-success" });
       }
     });
 
@@ -449,73 +449,75 @@ export function DashboardOwner() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 shrink-0 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {/* Hero Metric: Cash Position */}
+      <div className="rounded-xl border border-border bg-card p-8 shadow-sm shrink-0">
+        <p className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Cash Position
+        </p>
+        <div className="flex items-end gap-4">
+          <p className="text-5xl font-extrabold tracking-tight text-card-foreground">{formatKES(cashPosition)}</p>
+          <span className="pb-1.5 text-sm font-bold text-success dark:text-success">
+            Live
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 shrink-0 lg:grid-cols-5">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.invoicedLabel}
           </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">{formatKES(totalInvoicedMTD)}</p>
+          <div className="flex items-end gap-1.5">
+            <p className="text-xl font-bold text-card-foreground">{formatKES(totalInvoicedMTD)}</p>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.arrearsLabel}
           </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">{formatKES(outstandingArrears)}</p>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xl font-bold text-card-foreground">{formatKES(outstandingArrears)}</p>
             {overdueCount > 0 && (
-              <span className="pb-1 text-xs font-medium text-amber-500 dark:text-amber-400">
+              <span className="text-[10px] font-bold text-warning dark:text-warning">
                 {overdueCount} invoice{overdueCount > 1 ? "s" : ""} overdue
               </span>
             )}
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Cash Position
-          </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">{formatKES(cashPosition)}</p>
-            <span className="pb-1 text-xs font-medium text-emerald-500 dark:text-emerald-400">
-              Live
-            </span>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Bookkeeping Health
           </p>
-          <div className="flex items-end gap-3 mt-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 shrink-0">
-              <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-success/10 dark:bg-success/20 shrink-0">
+              <div className="h-2 w-2 rounded-full bg-success shadow-[0_0_8px_var(--color-success)]"></div>
             </div>
             <div>
-              <p className="text-lg font-bold text-card-foreground leading-none">Excellent</p>
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                Reconciled &middot; 0 uncategorized
+              <p className="text-sm font-bold text-card-foreground leading-none mb-0.5">Excellent</p>
+              <span className="text-[10px] font-bold text-success dark:text-success leading-none">
+                0 uncategorized
               </span>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Payroll Due
           </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">{formatKES(totalPayrollDue)}</p>
-            <span className="pb-1 text-xs font-medium text-muted-foreground">
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xl font-bold text-card-foreground">{formatKES(totalPayrollDue)}</p>
+            <span className="text-[10px] font-bold text-muted-foreground">
               {staff.filter((s) => s.status === "Active").length} active staff
             </span>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Inventory Alerts
           </p>
-          <div className="flex items-end gap-2">
-            <p className="text-2xl font-bold text-card-foreground">{lowStockCount}</p>
-            <span className={`pb-1 text-xs font-medium ${lowStockCount > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xl font-bold text-card-foreground">{lowStockCount}</p>
+            <span className={`text-[10px] font-bold ${lowStockCount > 0 ? 'text-warning dark:text-warning' : 'text-success dark:text-success'}`}>
               {lowStockCount > 0 ? 'items below min stock' : 'All stocked'}
             </span>
           </div>
@@ -525,24 +527,24 @@ export function DashboardOwner() {
         {cfg.extraCards.map((card) => (
           <div
             key={card.label}
-            className={`rounded-xl border bg-card p-5 shadow-sm ${
+            className={`rounded-xl border bg-card p-4 shadow-sm ${
               card.highlight
-                ? 'border-amber-400 dark:border-amber-600 ring-1 ring-amber-400/30'
+                ? 'border-warning dark:border-warning/60 ring-1 ring-warning/30'
                 : 'border-border'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-1.5 mb-1">
               {card.highlight && (
-                <Shield className="h-4 w-4 text-amber-500 shrink-0" />
+                <Shield className="h-3 w-3 text-warning shrink-0" />
               )}
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 {card.label}
               </p>
             </div>
-            <div className="flex items-end gap-2">
-              <p className="text-2xl font-bold text-card-foreground">{card.value}</p>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xl font-bold text-card-foreground">{card.value}</p>
               {card.highlight && (
-                <span className="pb-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-warning dark:text-warning">
                   Segregated
                 </span>
               )}
@@ -563,7 +565,7 @@ export function DashboardOwner() {
                 Revenue
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
+                <div className="h-3 w-3 rounded-full bg-success"></div>
                 Expenses
               </div>
             </div>

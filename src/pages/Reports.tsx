@@ -122,8 +122,8 @@ export function Reports() {
             <Table>
               <TableBody>
                 {/* INCOME SECTION */}
-                <TableRow className="bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20">
-                  <TableCell colSpan={2} className="font-bold text-emerald-800 dark:text-emerald-400 py-3 uppercase text-xs tracking-wider">
+                <TableRow className="bg-success/5 dark:bg-success/10 hover:bg-success/5 dark:hover:bg-success/10">
+                  <TableCell colSpan={2} className="font-bold text-success py-3 uppercase text-xs tracking-wider">
                     Income
                   </TableCell>
                 </TableRow>
@@ -141,7 +141,7 @@ export function Reports() {
                 )}
                 <TableRow className="bg-muted/10 hover:bg-muted/10 border-b-2 border-border">
                   <TableCell className="font-bold pl-6">Total Income</TableCell>
-                  <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">KES {totalIncome.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-bold text-success">KES {totalIncome.toLocaleString()}</TableCell>
                 </TableRow>
 
                 {/* EXPENSE SECTION */}
@@ -168,9 +168,9 @@ export function Reports() {
                 </TableRow>
 
                 {/* NET INCOME */}
-                <TableRow className={netIncome >= 0 ? "bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-50 dark:hover:bg-emerald-900/10" : "bg-rose-50 dark:bg-rose-900/10 hover:bg-rose-50 dark:hover:bg-rose-900/10"}>
-                  <TableCell className="font-extrabold text-lg uppercase tracking-tight py-4">Net Income</TableCell>
-                  <TableCell className={`text-right font-extrabold text-lg py-4 ${netIncome >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                <TableRow className={netIncome >= 0 ? "bg-success/10 dark:bg-success/20 hover:bg-success/10 dark:hover:bg-success/20" : "bg-destructive/10 dark:bg-destructive/20 hover:bg-destructive/10 dark:hover:bg-destructive/20"}>
+                  <TableCell className="font-bold py-4">Net Income (Loss)</TableCell>
+                  <TableCell className={`text-right font-extrabold text-lg py-4 ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
                     KES {netIncome.toLocaleString()}
                   </TableCell>
                 </TableRow>

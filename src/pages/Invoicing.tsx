@@ -305,10 +305,10 @@ function InvoiceDetailDialog({ invoice, open, onOpenChange }: { invoice: Invoice
               variant={invoice.status === "Paid" ? "default" : invoice.status === "Overdue" ? "destructive" : "secondary"}
               className={
                 invoice.status === "Paid"
-                  ? "bg-emerald-100 text-emerald-800 border-none dark:bg-emerald-900/30 dark:text-emerald-300"
+                  ? "bg-success/10 text-success border-none dark:bg-success/20 dark:text-success"
                   : invoice.status === "Pending"
-                  ? "bg-amber-100 text-amber-800 border-none dark:bg-amber-900/30 dark:text-amber-300"
-                  : "bg-destructive/10 text-destructive border-none"
+                  ? "bg-warning/10 text-warning border-none dark:bg-warning/20 dark:text-warning"
+                  : "bg-destructive/10 text-destructive border-none dark:bg-destructive/20 dark:text-destructive"
               }
             >
               {invoice.status}
@@ -320,7 +320,7 @@ function InvoiceDetailDialog({ invoice, open, onOpenChange }: { invoice: Invoice
           {/* Letterhead */}
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold text-emerald-600">{orgProfile.name}</h3>
+              <h3 className="text-xl font-bold text-success">{orgProfile.name}</h3>
               <p className="text-xs text-muted-foreground">{orgProfile.sector}</p>
             </div>
             <div className="text-right text-sm text-muted-foreground">
@@ -589,10 +589,10 @@ export function Invoicing() {
                       }
                       className={
                         invoice.status === "Paid"
-                          ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none dark:bg-emerald-900/30 dark:text-emerald-300"
+                          ? "bg-success/10 text-success hover:bg-success/20 border-none dark:bg-success/20 dark:text-success"
                           : invoice.status === "Pending"
-                          ? "bg-amber-100 text-amber-800 hover:bg-amber-100 border-none dark:bg-amber-900/30 dark:text-amber-300"
-                          : "bg-destructive/10 text-destructive hover:bg-destructive/10 border-none"
+                          ? "bg-warning/10 text-warning hover:bg-warning/20 border-none dark:bg-warning/20 dark:text-warning"
+                          : "bg-destructive/10 text-destructive hover:bg-destructive/20 border-none dark:bg-destructive/20 dark:text-destructive"
                       }
                     >
                       {invoice.status}
@@ -602,8 +602,7 @@ export function Invoicing() {
                     {invoice.status !== "Paid" && (
                       <Button 
                         variant="outline" 
-                        size="sm" 
-                        className="text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-900/40"
+                        className="text-success border-success/30 bg-success/10 hover:bg-success/20 dark:bg-success/20 dark:text-success dark:border-success/30 dark:hover:bg-success/30"
                         onClick={() => handleMpesaRequest(invoice.id, invoice.rawAmount)}
                         disabled={isProcessing === invoice.id}
                       >

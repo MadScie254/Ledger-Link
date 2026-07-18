@@ -77,14 +77,14 @@ export function Onboarding() {
             <p className="text-sm text-muted-foreground">
               LedgerLink syncs your data seamlessly with QuickBooks Online.
             </p>
-            <div className="rounded-md border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-300">
+            <div className="rounded-md border border-warning/30 bg-warning/10 dark:bg-warning/20 dark:border-warning/30 p-4 text-sm text-warning dark:text-warning">
               <p className="font-semibold">Action Required</p>
               <p>Configure your QBO credentials in Settings later, or connect now using OAuth.</p>
             </div>
             <div className="flex flex-wrap gap-4">
               <Button variant="outline" className="flex-1 min-w-0" onClick={() => setStep(1)}>Back</Button>
               <Button variant="outline" className="flex-1 min-w-0" onClick={() => setStep(3)}>Skip</Button>
-              <Button className="flex-1 min-w-0 bg-emerald-600 text-white hover:bg-emerald-700" onClick={handleConnectQBO}>Connect QBO</Button>
+              <Button className="flex-1 min-w-0 bg-success text-success-foreground hover:bg-success/90" onClick={handleConnectQBO}>Connect QBO</Button>
             </div>
           </div>
         )}

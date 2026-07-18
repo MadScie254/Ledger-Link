@@ -63,7 +63,7 @@ export function DashboardBoard() {
           </p>
           <div className="flex items-end gap-2">
             <p className="text-3xl font-bold text-card-foreground">KES 8.4M</p>
-            <span className="pb-1 text-sm font-medium text-emerald-500 dark:text-emerald-400">
+            <span className="pb-1 text-sm font-medium text-success dark:text-success">
               +5% YoY
             </span>
           </div>
@@ -97,7 +97,7 @@ export function DashboardBoard() {
               Revenue
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
+              <div className="h-3 w-3 rounded-full bg-success"></div>
               Expenses
             </div>
           </div>

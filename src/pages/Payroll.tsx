@@ -182,7 +182,7 @@ export function Payroll() {
                         <TableCell>{s.role}</TableCell>
                         <TableCell>KES {s.gross.toLocaleString()}</TableCell>
                         <TableCell>
-                          <Badge variant={s.status === "Active" ? "default" : "secondary"} className={s.status === "Active" ? "bg-emerald-100 text-emerald-800 border-none hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground border-none"}>
+                          <Badge variant={s.status === "Active" ? "default" : "secondary"} className={s.status === "Active" ? "bg-success/10 text-success border-none hover:bg-success/10 dark:bg-success/20 dark:text-success" : "bg-muted text-muted-foreground border-none"}>
                             {s.status}
                           </Badge>
                         </TableCell>
@@ -222,13 +222,13 @@ export function Payroll() {
               </div>
             ) : (
               <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col flex-1">
-                <div className="p-6 border-b border-border flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-900/10 shrink-0">
+                <div className="p-6 border-b border-border flex items-center justify-between bg-success/10 dark:bg-success/20 shrink-0">
                   <div className="flex items-center gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                    <CheckCircle2 className="h-6 w-6 text-success" />
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-card-foreground">July 2026 Payroll Generated</h3>
-                        <Badge variant="outline" className="text-[10px] uppercase border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                        <Badge variant="outline" className="text-[10px] uppercase border-success/30 bg-success/10 text-success dark:bg-success/20 dark:text-success dark:border-success/30">
                           2026 Rates
                         </Badge>
                       </div>
@@ -236,13 +236,13 @@ export function Payroll() {
                     </div>
                   </div>
                   {isDisbursed ? (
-                    <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-none px-3 py-1">
+                    <Badge variant="outline" className="bg-success/10 text-success border-none px-3 py-1">
                       Disbursed on {new Date(disbursedEntry!.disbursedAt).toLocaleDateString()}
                     </Badge>
                   ) : (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
+                        <Button className="bg-success text-success-foreground hover:bg-success/90">
                           Approve & Disburse
                         </Button>
                       </AlertDialogTrigger>
@@ -288,7 +288,7 @@ export function Payroll() {
                             <TableCell className="text-destructive">-{(d.nssf).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell className="text-destructive">-{(d.shif).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell className="text-destructive">-{(d.ahl).toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
-                            <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">KES {d.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
+                            <TableCell className="font-bold text-success">KES {d.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}</TableCell>
                             <TableCell className="text-right">
                               <Button 
                                 variant="ghost" 

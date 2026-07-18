@@ -136,7 +136,7 @@ export function Clients() {
                     </TableCell>
                     <TableCell className="text-right">
                       {c.outstandingBalance > 0 ? (
-                        <span className="font-bold text-amber-600 dark:text-amber-500">
+                        <span className="font-bold text-warning">
                           KES {c.outstandingBalance.toLocaleString()}
                         </span>
                       ) : (

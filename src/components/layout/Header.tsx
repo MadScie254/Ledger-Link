@@ -182,8 +182,8 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className={`flex items-center gap-2 rounded-full border px-3 py-1 ${qbConnected ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-500 dark:bg-slate-800 dark:border-slate-700'}`}>
-          <div className={`h-1.5 w-1.5 rounded-full ${qbConnected ? 'bg-emerald-500' : 'bg-slate-400'}`}></div>
+        <div className={`flex items-center gap-2 rounded-full border px-3 py-1 ${qbConnected ? 'border-success/30 bg-success/10 text-success dark:bg-success/20 dark:border-success/30' : 'border-slate-200 bg-slate-50 text-slate-500 dark:bg-slate-800 dark:border-slate-700'}`}>
+          <div className={`h-1.5 w-1.5 rounded-full ${qbConnected ? 'bg-success' : 'bg-slate-400'}`}></div>
           <span className="text-[11px] font-semibold uppercase tracking-wider">
             {qbConnected ? 'QB Synced' : 'QB Disconnected'}
           </span>
