@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/useAppStore";
 import { toast } from "sonner";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, LifeBuoy } from "lucide-react";
 
 export function Settings() {
   const { role, setRole } = useAuth();
@@ -33,6 +34,27 @@ export function Settings() {
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountType, setNewAccountType] = useState<"Income" | "Expense" | "Asset" | "Liability">("Expense");
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
+
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (highlightId) {
+      setHighlightedRow(highlightId);
+      setTimeout(() => {
+        const el = document.getElementById(`settings-account-${highlightId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+
+      const timer = setTimeout(() => {
+        setHighlightedRow(null);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("highlight");
+        setSearchParams(newParams, { replace: true });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSaveProfile = () => {
     setOrgProfile({ name, sector });
@@ -97,6 +119,19 @@ export function Settings() {
             </div>
             <Button onClick={handleSaveProfile} className="mt-2">Save Profile</Button>
           </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Help & Support</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Need assistance with your account or have a question about LedgerLink?
+          </p>
+          <Link to="/contact">
+            <Button variant="outline">
+              <LifeBuoy className="mr-2 h-4 w-4" />
+              Contact Support
+            </Button>
+          </Link>
         </div>
 
         <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col max-h-[600px]">
@@ -169,17 +204,24 @@ export function Settings() {
                           {type} Accounts
                         </TableCell>
                       </TableRow>
-                      {groupedAccounts.map(account => (
-                        <TableRow key={account.id} className="hover:bg-muted/50">
-                          <TableCell className="font-medium text-xs text-muted-foreground">{account.id}</TableCell>
-                          <TableCell className="font-medium text-card-foreground">{account.name}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="bg-background">
-                              {account.type}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {groupedAccounts.map(account => {
+                        const isHighlighted = highlightedRow === account.id;
+                        return (
+                          <TableRow 
+                            key={account.id} 
+                            id={`settings-account-${account.id}`}
+                            className={`hover:bg-muted/50 transition-colors duration-500 ${isHighlighted ? 'bg-primary/20 dark:bg-primary/30 ring-2 ring-primary ring-inset' : ''}`}
+                          >
+                            <TableCell className="font-medium text-xs text-muted-foreground">{account.id}</TableCell>
+                            <TableCell className="font-medium text-card-foreground">{account.name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-background">
+                                {account.type}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </React.Fragment>
                   );
                 })}
