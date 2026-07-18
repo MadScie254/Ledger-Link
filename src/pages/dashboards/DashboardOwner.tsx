@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity } from "lucide-react";
+import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -625,6 +625,23 @@ export function DashboardOwner() {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-card-foreground">Help & Support</h3>
+            <p className="text-sm text-muted-foreground">
+              Get help with invoices, payroll, reporting, or access without leaving the dashboard.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="w-fit">
+            <a href="mailto:support@ledgerlink.demo">
+              <Mail className="mr-2 h-4 w-4" />
+              Email Support
+            </a>
+          </Button>
         </div>
       </div>
       

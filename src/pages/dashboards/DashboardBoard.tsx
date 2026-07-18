@@ -10,8 +10,10 @@ import {
 } from "recharts";
 import { chartData } from "@/lib/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { pageItem, pageStagger } from "@/lib/motion";
+import { Mail } from "lucide-react";
 
 function BoardSkeleton() {
   return (
@@ -119,6 +121,23 @@ export function DashboardBoard() {
               <Line type="monotone" dataKey="expenses" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#10b981', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      </motion.div>
+
+      <motion.div className="rounded-xl border border-border bg-card p-6 shadow-sm" variants={pageItem}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-card-foreground">Help & Support</h3>
+            <p className="text-sm text-muted-foreground">
+              Need a hand with reports, reconciliation, or access issues? Support stays inside the dashboard.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="w-fit">
+            <a href="mailto:support@ledgerlink.demo">
+              <Mail className="mr-2 h-4 w-4" />
+              Email Support
+            </a>
+          </Button>
         </div>
       </motion.div>
     </motion.div>

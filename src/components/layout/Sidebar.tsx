@@ -26,7 +26,7 @@ const navigation = [
   { name: "Reports", href: "/app/reports", icon: PieChart, roles: ["owner", "finance", "board"] },
   { name: "Activity Log", href: "/app/activity", icon: List, roles: ["owner", "board"] },
   { name: "Settings", href: "/app/settings", icon: Settings, roles: ["owner"] },
-  { name: "Help & Support", href: "/contact", icon: HelpCircle, roles: ["owner", "finance", "board"] },
+  { name: "Help & Support", href: "/app/dashboard", icon: HelpCircle, roles: ["owner", "finance", "board"] },
 ];
 
 interface SidebarProps {
