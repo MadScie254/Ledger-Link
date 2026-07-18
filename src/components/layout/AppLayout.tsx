@@ -11,6 +11,7 @@ import { Accounting } from "@/pages/Accounting";
 import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
 import { ActivityLog } from "@/pages/ActivityLog";
+import { Support } from "@/pages/Support";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AIAssistant } from "@/components/AIAssistant";
 import { AnimatePresence, motion } from "framer-motion";
@@ -46,6 +47,7 @@ export function AppLayout() {
                   <Route path="/reports/*" element={<Reports />} />
                   <Route path="/settings/*" element={<Settings />} />
                   <Route path="/activity/*" element={<ActivityLog />} />
+                  <Route path="/support/*" element={<Support />} />
                   <Route path="*" element={
                     <div className="flex h-full items-center justify-center text-muted-foreground">
                       <p>Module is under construction.</p>

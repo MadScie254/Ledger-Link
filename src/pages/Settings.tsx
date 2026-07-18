@@ -202,7 +202,7 @@ export function Settings() {
               <p className="text-sm text-muted-foreground mb-4">
                 Need assistance with your account or have a question about LedgerLink?
               </p>
-              <Link to="/contact">
+              <Link to="/app/support">
                 <Button variant="outline">
                   <LifeBuoy className="mr-2 h-4 w-4" />
                   Contact Support
