@@ -25,7 +25,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 
 export function Accounting() {
-  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, markBillPaid, accounts, invoices, updateInvoiceStatus } = useAppStore();
+  const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, updateBillStatus, accounts, invoices, updateInvoiceStatus } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"mpesa" | "bank" | "bills">("mpesa");
   const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
@@ -36,7 +36,9 @@ export function Accounting() {
   const [newBillAmount, setNewBillAmount] = useState<number | "">("");
   const [newBillDate, setNewBillDate] = useState(new Date().toISOString().split("T")[0]);
   const [newBillDueDate, setNewBillDueDate] = useState("");
+  const [newBillCategory, setNewBillCategory] = useState("Office Supplies");
   const [newBillNotes, setNewBillNotes] = useState("");
+  const [newBillReceipt, setNewBillReceipt] = useState<File | null>(null);
 
   const handleAddBill = () => {
     if (!newBillVendor.trim() || !newBillAccount || !newBillAmount || !newBillDueDate) {
@@ -53,7 +55,9 @@ export function Accounting() {
       date: formattedDate,
       dueDate: formattedDue,
       status: "Unpaid",
-      notes: newBillNotes
+      category: newBillCategory,
+      notes: newBillNotes,
+      receiptUrl: newBillReceipt ? URL.createObjectURL(newBillReceipt) : undefined
     });
     toast.success("Bill created successfully");
     setIsAddBillOpen(false);
@@ -62,6 +66,7 @@ export function Accounting() {
     setNewBillAmount("");
     setNewBillDueDate("");
     setNewBillNotes("");
+    setNewBillReceipt(null);
   };
 
   const handleMatch = (type: "mpesa" | "bank", id: string) => {
@@ -130,7 +135,7 @@ export function Accounting() {
           b.amount === t.amount
         );
         if (matchingBill) {
-          markBillPaid(matchingBill.id);
+          updateBillStatus(matchingBill.id, "Paid");
           updateBankTransaction(t.id, { status: "Matched" });
           matchCount++;
         }
@@ -201,12 +206,22 @@ export function Accounting() {
                     <input value={newBillVendor} onChange={(e) => setNewBillVendor(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Category *</label>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Account *</label>
                     <select value={newBillAccount} onChange={(e) => setNewBillAccount(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
                       <option value="" disabled>Select Expense Account...</option>
                       {accounts.filter(a => a.type === "Expense").map(acc => (
                         <option key={acc.id} value={acc.id}>{acc.name}</option>
                       ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Expense Category *</label>
+                    <select value={newBillCategory} onChange={(e) => setNewBillCategory(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
+                      <option value="Office Supplies">Office Supplies</option>
+                      <option value="Utilities">Utilities</option>
+                      <option value="Software & Subscriptions">Software & Subscriptions</option>
+                      <option value="Rent">Rent</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                   <div>
@@ -226,6 +241,28 @@ export function Accounting() {
                   <div>
                     <label className="text-sm font-medium text-muted-foreground mb-1 block">Notes</label>
                     <textarea value={newBillNotes} onChange={(e) => setNewBillNotes(e.target.value)} className="w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-1 block">Attach Receipt</label>
+                    <div className="border-2 border-dashed border-border rounded-lg p-4 text-center hover:bg-muted/50 transition-colors">
+                      <input 
+                        type="file" 
+                        accept="image/*,.pdf" 
+                        id="receipt-upload" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setNewBillReceipt(e.target.files[0]);
+                          }
+                        }}
+                      />
+                      <label htmlFor="receipt-upload" className="cursor-pointer flex flex-col items-center justify-center space-y-2">
+                        <Receipt className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-sm text-primary font-medium">
+                          {newBillReceipt ? newBillReceipt.name : "Click to upload receipt"}
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3">
@@ -422,7 +459,12 @@ export function Accounting() {
                     >
                       <TableCell className="font-medium text-primary text-xs">{bill.id}</TableCell>
                       <TableCell className="font-medium text-card-foreground">{bill.vendor}</TableCell>
-                      <TableCell className="text-muted-foreground">{accName}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          {bill.category}
+                          {bill.receiptUrl && <Receipt className="h-3 w-3 text-primary" />}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">{bill.date}</TableCell>
                       <TableCell className="text-muted-foreground">{bill.dueDate}</TableCell>
                       <TableCell className="font-bold">KES {bill.amount.toLocaleString()}</TableCell>
@@ -439,7 +481,7 @@ export function Accounting() {
                       </TableCell>
                       <TableCell className="text-right">
                         {bill.status === "Unpaid" && (
-                          <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => markBillPaid(bill.id)}>
+                          <Button size="sm" variant="outline" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => updateBillStatus(bill.id, "Paid")}>
                             <FileCheck className="h-4 w-4 mr-1" /> Mark Paid
                           </Button>
                         )}

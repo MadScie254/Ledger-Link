@@ -81,6 +81,8 @@ export interface Bill {
   date: string;
   dueDate: string;
   status: "Unpaid" | "Paid";
+  category: string;
+  receiptUrl?: string;
   notes: string;
 }
 
@@ -123,7 +125,7 @@ interface AppState {
 
   bills: Bill[];
   addBill: (bill: Omit<Bill, "id">) => void;
-  markBillPaid: (id: string) => void;
+  updateBillStatus: (id: string, status: "Unpaid" | "Paid") => void;
 
   staff: typeof initialStaffData;
   setStaff: (staff: typeof initialStaffData) => void;
@@ -224,21 +226,21 @@ export const useAppStore = create<AppState>()(
             activityLog: [act, ...state.activityLog].slice(0, 100)
           };
         }),
-      markBillPaid: (id) =>
+      updateBillStatus: (id, status) =>
         set((state) => {
           const bill = state.bills.find((b) => b.id === id);
           if (!bill) return {};
           const act = {
             id: Math.random().toString(36).substring(2, 9),
-            type: "Bill Paid",
+            type: `Bill ${status}`,
             title: bill.id,
-            description: `Bill from ${bill.vendor} marked as paid`,
+            description: `Bill from ${bill.vendor} marked as ${status.toLowerCase()}`,
             timestamp: new Date().toISOString(),
             icon: "receipt",
           };
           return {
             bills: state.bills.map((b) =>
-              b.id === id ? { ...b, status: "Paid" } : b
+              b.id === id ? { ...b, status } : b
             ),
             activityLog: [act, ...state.activityLog].slice(0, 100)
           };

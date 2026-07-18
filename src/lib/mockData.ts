@@ -32,17 +32,17 @@ export const initialAccounts = [
 ];
 
 export const initialBills = [
-  { id: "BILL-2026-001", vendor: "KPLC", accountId: "ACC-005", amount: 15000, date: "Mar 02, 2026", dueDate: "Mar 10, 2026", status: "Paid", notes: "Electricity for March" },
-  { id: "BILL-2026-002", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Mar 05, 2026", dueDate: "Mar 20, 2026", status: "Paid", notes: "Water supply" },
-  { id: "BILL-2026-003", vendor: "KPLC", accountId: "ACC-005", amount: 14500, date: "Apr 02, 2026", dueDate: "Apr 10, 2026", status: "Paid", notes: "Electricity for April" },
-  { id: "BILL-2026-004", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8800, date: "Apr 05, 2026", dueDate: "Apr 20, 2026", status: "Paid", notes: "Water supply" },
-  { id: "BILL-2026-005", vendor: "KPLC", accountId: "ACC-005", amount: 15200, date: "May 02, 2026", dueDate: "May 10, 2026", status: "Paid", notes: "Electricity for May" },
-  { id: "BILL-2026-006", vendor: "Safaricom", accountId: "ACC-005", amount: 12000, date: "May 15, 2026", dueDate: "May 30, 2026", status: "Paid", notes: "Internet Services" },
-  { id: "BILL-2026-007", vendor: "KPLC", accountId: "ACC-005", amount: 16000, date: "Jun 02, 2026", dueDate: "Jun 10, 2026", status: "Paid", notes: "Electricity for June" },
-  { id: "BILL-2026-008", vendor: "OfficeMart", accountId: "ACC-006", amount: 25000, date: "Jun 12, 2026", dueDate: "Jun 26, 2026", status: "Paid", notes: "Printer Cartridges" },
-  { id: "BILL-2026-009", vendor: "KPLC", accountId: "ACC-005", amount: 15500, date: "Jul 02, 2026", dueDate: "Jul 10, 2026", status: "Paid", notes: "Electricity for July" },
-  { id: "BILL-2026-010", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Jul 05, 2026", dueDate: "Jul 20, 2026", status: "Unpaid", notes: "Water supply" },
-  { id: "BILL-2026-011", vendor: "OfficeMart", accountId: "ACC-006", amount: 32000, date: "Jul 08, 2026", dueDate: "Jul 22, 2026", status: "Paid", notes: "Stationery and printer ink" }
+  { id: "BILL-2026-001", vendor: "KPLC", accountId: "ACC-005", amount: 15000, date: "Mar 02, 2026", dueDate: "Mar 10, 2026", status: "Paid", category: "Utilities", notes: "Electricity for March" },
+  { id: "BILL-2026-002", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Mar 05, 2026", dueDate: "Mar 20, 2026", status: "Paid", category: "Utilities", notes: "Water supply" },
+  { id: "BILL-2026-003", vendor: "KPLC", accountId: "ACC-005", amount: 14500, date: "Apr 02, 2026", dueDate: "Apr 10, 2026", status: "Paid", category: "Utilities", notes: "Electricity for April" },
+  { id: "BILL-2026-004", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8800, date: "Apr 05, 2026", dueDate: "Apr 20, 2026", status: "Paid", category: "Utilities", notes: "Water supply" },
+  { id: "BILL-2026-005", vendor: "KPLC", accountId: "ACC-005", amount: 15200, date: "May 02, 2026", dueDate: "May 10, 2026", status: "Paid", category: "Utilities", notes: "Electricity for May" },
+  { id: "BILL-2026-006", vendor: "Safaricom", accountId: "ACC-005", amount: 12000, date: "May 15, 2026", dueDate: "May 30, 2026", status: "Paid", category: "Software & Subscriptions", notes: "Internet Services" },
+  { id: "BILL-2026-007", vendor: "KPLC", accountId: "ACC-005", amount: 16000, date: "Jun 02, 2026", dueDate: "Jun 10, 2026", status: "Paid", category: "Utilities", notes: "Electricity for June" },
+  { id: "BILL-2026-008", vendor: "OfficeMart", accountId: "ACC-006", amount: 25000, date: "Jun 12, 2026", dueDate: "Jun 26, 2026", status: "Paid", category: "Office Supplies", notes: "Printer Cartridges" },
+  { id: "BILL-2026-009", vendor: "KPLC", accountId: "ACC-005", amount: 15500, date: "Jul 02, 2026", dueDate: "Jul 10, 2026", status: "Paid", category: "Utilities", notes: "Electricity for July" },
+  { id: "BILL-2026-010", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Jul 05, 2026", dueDate: "Jul 20, 2026", status: "Unpaid", category: "Utilities", notes: "Water supply" },
+  { id: "BILL-2026-011", vendor: "OfficeMart", accountId: "ACC-006", amount: 32000, date: "Jul 08, 2026", dueDate: "Jul 22, 2026", status: "Paid", category: "Office Supplies", notes: "Stationery and printer ink" }
 ];
 
 export const initialCustomers = [
