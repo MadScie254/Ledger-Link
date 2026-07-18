@@ -64,14 +64,14 @@ export function PublicHeader() {
               </Link>
             )
           )}
-          <Link to="/app">
+          <Link to="/auth?mode=login">
             <Button size="sm" className="rounded-full px-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               Login / Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </nav>
 
-        <Link to="/app" className="lg:hidden">
+        <Link to="/auth?mode=signup" className="lg:hidden">
           <Button size="sm" className="rounded-full px-4">Get started</Button>
         </Link>
       </div>

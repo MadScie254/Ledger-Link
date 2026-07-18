@@ -527,7 +527,7 @@ export function Landing() {
                       ))}
                     </ul>
 
-                    <Link to={tier.cta === "Contact us" ? "/contact" : "/app"} className="mt-auto">
+                    <Link to={tier.cta === "Contact us" ? "/contact" : "/auth?mode=signup"} className="mt-auto">
                       <Button size="lg" className="h-12 w-full rounded-full text-base" variant={tier.highlighted ? "default" : "outline"}>
                         {tier.cta}
                       </Button>
@@ -573,7 +573,7 @@ export function Landing() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row lg:mt-0">
-              <Link to="/app">
+              <Link to="/auth?mode=signup">
                 <Button className="h-12 rounded-full px-6">Start for free</Button>
               </Link>
               <Link to="/contact">
