@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -14,8 +14,6 @@ import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { pageItem, pageStagger } from "@/lib/motion";
 import {
   Dialog,
   DialogContent,
@@ -189,7 +187,7 @@ function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenC
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Compliance</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-violet-500" /> Custom</div>
           </div>
-        </motion.div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -216,14 +214,14 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Total Invoiced (MTD)",
         arrearsLabel: "Unpaid School Fees",
-        complianceText: "Term fee collection deadline in 3 days — follow up with parents who have outstanding balances",
+        complianceText: "Term fee collection deadline in 3 days ΓÇö follow up with parents who have outstanding balances",
         extraCards: [],
       };
     case "Church":
       return {
         invoicedLabel: "Offerings & Pledges (MTD)",
         arrearsLabel: "Outstanding Pledges",
-        complianceText: "Annual financial statement filing deadline approaching — ensure all offerings are reconciled",
+        complianceText: "Annual financial statement filing deadline approaching ΓÇö ensure all offerings are reconciled",
         extraCards: [
           { label: "Trust/Building Fund Balance", value: "KES 1.8M" },
         ],
@@ -232,7 +230,7 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Total Billed (MTD)",
         arrearsLabel: "Outstanding Arrears",
-        complianceText: "LSK annual practising certificate renewal due — ensure compliance filings are current",
+        complianceText: "LSK annual practising certificate renewal due ΓÇö ensure compliance filings are current",
         extraCards: [
           { label: "Client Trust Account", value: "KES 5.2M", highlight: true },
         ],
@@ -241,7 +239,7 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Patient Billing (MTD)",
         arrearsLabel: "Outstanding Arrears",
-        complianceText: "NHIF remittance deadline in 3 days — ensure all claims are submitted",
+        complianceText: "NHIF remittance deadline in 3 days ΓÇö ensure all claims are submitted",
         extraCards: [],
       };
     default:
@@ -431,8 +429,8 @@ export function DashboardOwner() {
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <motion.div className="flex h-full flex-col space-y-6 overflow-hidden" variants={pageStagger} initial="hidden" animate="show">
-      <motion.div className="flex items-end justify-between shrink-0" variants={pageItem}>
+    <div className="flex h-full flex-col space-y-6 overflow-hidden">
+      <div className="flex items-end justify-between shrink-0">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Morning, {isFinance ? "Finance Manager" : "Owner"}
@@ -449,10 +447,10 @@ export function DashboardOwner() {
             })()}
           </p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Hero Metric: Cash Position */}
-      <motion.div className="rounded-xl border border-border bg-card p-8 shadow-sm shrink-0" variants={pageItem}>
+      <div className="rounded-xl border border-border bg-card p-8 shadow-sm shrink-0">
         <p className="mb-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
           Cash Position
         </p>
@@ -462,18 +460,18 @@ export function DashboardOwner() {
             Live
           </span>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div className="grid grid-cols-2 gap-4 shrink-0 lg:grid-cols-5" variants={pageStagger}>
-        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
+      <div className="grid grid-cols-2 gap-4 shrink-0 lg:grid-cols-5">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.invoicedLabel}
           </p>
           <div className="flex items-end gap-1.5">
             <p className="text-xl font-bold text-card-foreground">{formatKES(totalInvoicedMTD)}</p>
           </div>
-        </motion.div>
-        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             {cfg.arrearsLabel}
           </p>
@@ -485,8 +483,8 @@ export function DashboardOwner() {
               </span>
             )}
           </div>
-        </motion.div>
-        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Bookkeeping Health
           </p>
@@ -501,8 +499,8 @@ export function DashboardOwner() {
               </span>
             </div>
           </div>
-        </motion.div>
-        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Payroll Due
           </p>
@@ -512,8 +510,8 @@ export function DashboardOwner() {
               {staff.filter((s) => s.status === "Active").length} active staff
             </span>
           </div>
-        </motion.div>
-        <motion.div className="rounded-xl border border-border bg-card p-4 shadow-sm" variants={pageItem}>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Inventory Alerts
           </p>
@@ -642,7 +640,7 @@ export function DashboardOwner() {
         <button onClick={() => setCalendarOpen(true)} className="px-4 py-1.5 bg-background text-primary rounded-lg text-xs font-bold hover:bg-muted transition-colors">
           View Calendar
         </button>
-      </motion.div>
+      </div>
 
       {/* Calendar Dialog */}
       <CalendarDialog open={calendarOpen} onOpenChange={setCalendarOpen} events={calendarEvents} />
