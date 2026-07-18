@@ -18,7 +18,7 @@ export function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full font-sans bg-slate-50 text-slate-900 overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
+    <div className="flex h-screen w-full font-sans bg-background text-foreground overflow-hidden">
       <Sidebar isMobileOpen={isMobileSidebarOpen} setIsMobileOpen={setIsMobileSidebarOpen} />
       <div className="flex flex-1 flex-col min-w-0">
         <Header onMenuClick={() => setIsMobileSidebarOpen(true)} />
@@ -36,7 +36,7 @@ export function AppLayout() {
               <Route path="/settings/*" element={<Settings />} />
               <Route path="/activity/*" element={<ActivityLog />} />
               <Route path="*" element={
-                <div className="flex h-full items-center justify-center text-slate-500">
+                <div className="flex h-full items-center justify-center text-muted-foreground">
                   <p>Module is under construction.</p>
                 </div>
               } />

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, AlertTriangle, ArrowRightLeft, Search, Check, X, History, PackageOpen } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import { useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -68,6 +69,8 @@ export function Inventory() {
   const { inventory, updateInventoryQty, movements, addMovement } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
 
   // Inline adjust state
   const [adjustingItemId, setAdjustingItemId] = useState<string | null>(null);
@@ -78,6 +81,27 @@ export function Inventory() {
     const t = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const highlightId = searchParams.get("highlight");
+      if (highlightId) {
+        setHighlightedRow(highlightId);
+        setTimeout(() => {
+          const el = document.getElementById(`inventory-row-${highlightId}`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+        
+        const timer = setTimeout(() => {
+          setHighlightedRow(null);
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete("highlight");
+          setSearchParams(newParams, { replace: true });
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoading, searchParams, setSearchParams]);
 
   const filteredInventory = useMemo(() => {
     return inventory.filter(i => 
@@ -243,9 +267,14 @@ export function Inventory() {
               {filteredInventory.map(item => {
                 const isLowStock = item.qty <= item.minQty;
                 const isAdjusting = adjustingItemId === item.id;
+                const isHighlighted = highlightedRow === item.id;
 
                 return (
-                  <TableRow key={item.id} className="hover:bg-muted/50">
+                  <TableRow 
+                    key={item.id} 
+                    id={`inventory-row-${item.id}`}
+                    className={`hover:bg-muted/50 transition-colors duration-500 ${isHighlighted ? 'bg-primary/20 dark:bg-primary/30 ring-2 ring-primary ring-inset' : ''}`}
+                  >
                     <TableCell className="font-medium text-primary">{item.id}</TableCell>
                     <TableCell className="font-medium text-card-foreground">{item.name}</TableCell>
                     <TableCell>{item.category}</TableCell>

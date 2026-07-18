@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet, Receipt, Plus, CreditCard } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import { useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -25,7 +26,9 @@ import { toast } from "sonner";
 
 export function Accounting() {
   const { mpesaTransactions, bankTransactions, updateMpesaTransaction, updateBankTransaction, bills, addBill, markBillPaid, accounts, invoices, updateInvoiceStatus } = useAppStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"mpesa" | "bank" | "bills">("mpesa");
+  const [highlightedRow, setHighlightedRow] = useState<string | null>(null);
 
   const [isAddBillOpen, setIsAddBillOpen] = useState(false);
   const [newBillVendor, setNewBillVendor] = useState("");
@@ -140,6 +143,32 @@ export function Accounting() {
       toast.info("Auto-Match complete. No new matches found.");
     }
   };
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab") as "mpesa" | "bank" | "bills" | null;
+    const highlightId = searchParams.get("highlight");
+
+    if (tabParam && ["mpesa", "bank", "bills"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+
+    if (highlightId) {
+      setHighlightedRow(highlightId);
+      setTimeout(() => {
+        const el = document.getElementById(`accounting-row-${highlightId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+
+      const timer = setTimeout(() => {
+        setHighlightedRow(null);
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("highlight");
+        newParams.delete("tab");
+        setSearchParams(newParams, { replace: true });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-hidden">
@@ -384,8 +413,13 @@ export function Accounting() {
               <TableBody>
                 {bills.map((bill) => {
                   const accName = accounts.find(a => a.id === bill.accountId)?.name || "Unknown";
+                  const isHighlighted = highlightedRow === bill.id;
                   return (
-                    <TableRow key={bill.id} className="hover:bg-muted/50">
+                    <TableRow 
+                      key={bill.id} 
+                      id={`accounting-row-${bill.id}`}
+                      className={`hover:bg-muted/50 transition-colors duration-500 ${isHighlighted ? 'bg-primary/20 dark:bg-primary/30 ring-2 ring-primary ring-inset' : ''}`}
+                    >
                       <TableCell className="font-medium text-primary text-xs">{bill.id}</TableCell>
                       <TableCell className="font-medium text-card-foreground">{bill.vendor}</TableCell>
                       <TableCell className="text-muted-foreground">{accName}</TableCell>

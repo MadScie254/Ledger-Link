@@ -13,6 +13,7 @@ import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, Che
 import { useState, useEffect, useMemo } from "react";
 import { useAppStore, type Invoice, type InvoiceLineItem } from "@/store/useAppStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -451,6 +452,7 @@ function InvoiceDetailDialog({ invoice, open, onOpenChange }: { invoice: Invoice
 
 export function Invoicing() {
   const { invoices, addReminder, updateInvoiceStatus, addInvoice } = useAppStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState("All");
   const [sortField, setSortField] = useState<SortField>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
@@ -464,6 +466,21 @@ export function Invoicing() {
     const t = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const highlightId = searchParams.get("highlight");
+      if (highlightId) {
+        const inv = invoices.find((i) => i.id === highlightId);
+        if (inv) {
+          setDetailInvoice(inv);
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete("highlight");
+          setSearchParams(newParams, { replace: true });
+        }
+      }
+    }
+  }, [isLoading, searchParams, invoices, setSearchParams]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

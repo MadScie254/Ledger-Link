@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileDown, Users, Calculator, CheckCircle2, Search } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import { useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -66,11 +67,13 @@ function PayrollSkeleton() {
 }
 
 export function Payroll() {
-  const { staff, payrollHistory, disbursePayroll, orgProfile } = useAppStore();
-  const [activeTab, setActiveTab] = useState<"directory" | "run">("directory");
-  const [payrollRun, setPayrollRun] = useState(false);
+  const { staff, disbursePayroll, payrollHistory, orgProfile } = useAppStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"directory" | "run" | "history">("directory");
   const [searchQuery, setSearchQuery] = useState("");
+  const [payrollRun, setPayrollRun] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHighlighted, setIsHighlighted] = useState(false);
 
   const currentPeriod = "July 2026";
   const disbursedEntry = payrollHistory.find(p => p.period === currentPeriod);
@@ -80,6 +83,23 @@ export function Payroll() {
     const t = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const highlightId = searchParams.get("highlight");
+      if (highlightId === "payroll-due") {
+        setActiveTab("run");
+        setIsHighlighted(true);
+        const timer = setTimeout(() => {
+          setIsHighlighted(false);
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete("highlight");
+          setSearchParams(newParams, { replace: true });
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoading, searchParams, setSearchParams]);
 
   const filteredStaff = useMemo(() => {
     return staff.filter(s => 
@@ -210,7 +230,7 @@ export function Payroll() {
         {activeTab === "run" && (
           <div className="space-y-6 h-full flex flex-col pb-6">
             {!payrollRun ? (
-              <div className="rounded-xl border border-border bg-card shadow-sm p-8 text-center flex flex-col items-center justify-center flex-1">
+              <div className={`rounded-xl border border-border bg-card shadow-sm p-8 text-center flex flex-col items-center justify-center flex-1 transition-colors duration-500 ${isHighlighted ? 'bg-primary/10 dark:bg-primary/20 ring-2 ring-primary ring-inset' : ''}`}>
                 <Calculator className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-bold text-card-foreground mb-2">Generate July 2026 Payroll</h3>
                 <p className="text-sm text-muted-foreground mb-6 max-w-md">
