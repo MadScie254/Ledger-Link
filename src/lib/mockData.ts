@@ -32,36 +32,17 @@ export const initialAccounts = [
 ];
 
 export const initialBills = [
-  {
-    id: "BILL-2026-001",
-    vendor: "KPLC",
-    accountId: "ACC-005",
-    amount: 15000,
-    date: "Jul 02, 2026",
-    dueDate: "Jul 10, 2026",
-    status: "Paid",
-    notes: "Electricity for July"
-  },
-  {
-    id: "BILL-2026-002",
-    vendor: "Nairobi Water",
-    accountId: "ACC-005",
-    amount: 8500,
-    date: "Jul 05, 2026",
-    dueDate: "Jul 20, 2026",
-    status: "Unpaid",
-    notes: "Water supply"
-  },
-  {
-    id: "BILL-2026-003",
-    vendor: "OfficeMart",
-    accountId: "ACC-006",
-    amount: 32000,
-    date: "Jul 08, 2026",
-    dueDate: "Jul 22, 2026",
-    status: "Paid",
-    notes: "Stationery and printer ink"
-  }
+  { id: "BILL-2026-001", vendor: "KPLC", accountId: "ACC-005", amount: 15000, date: "Mar 02, 2026", dueDate: "Mar 10, 2026", status: "Paid", notes: "Electricity for March" },
+  { id: "BILL-2026-002", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Mar 05, 2026", dueDate: "Mar 20, 2026", status: "Paid", notes: "Water supply" },
+  { id: "BILL-2026-003", vendor: "KPLC", accountId: "ACC-005", amount: 14500, date: "Apr 02, 2026", dueDate: "Apr 10, 2026", status: "Paid", notes: "Electricity for April" },
+  { id: "BILL-2026-004", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8800, date: "Apr 05, 2026", dueDate: "Apr 20, 2026", status: "Paid", notes: "Water supply" },
+  { id: "BILL-2026-005", vendor: "KPLC", accountId: "ACC-005", amount: 15200, date: "May 02, 2026", dueDate: "May 10, 2026", status: "Paid", notes: "Electricity for May" },
+  { id: "BILL-2026-006", vendor: "Safaricom", accountId: "ACC-005", amount: 12000, date: "May 15, 2026", dueDate: "May 30, 2026", status: "Paid", notes: "Internet Services" },
+  { id: "BILL-2026-007", vendor: "KPLC", accountId: "ACC-005", amount: 16000, date: "Jun 02, 2026", dueDate: "Jun 10, 2026", status: "Paid", notes: "Electricity for June" },
+  { id: "BILL-2026-008", vendor: "OfficeMart", accountId: "ACC-006", amount: 25000, date: "Jun 12, 2026", dueDate: "Jun 26, 2026", status: "Paid", notes: "Printer Cartridges" },
+  { id: "BILL-2026-009", vendor: "KPLC", accountId: "ACC-005", amount: 15500, date: "Jul 02, 2026", dueDate: "Jul 10, 2026", status: "Paid", notes: "Electricity for July" },
+  { id: "BILL-2026-010", vendor: "Nairobi Water", accountId: "ACC-005", amount: 8500, date: "Jul 05, 2026", dueDate: "Jul 20, 2026", status: "Unpaid", notes: "Water supply" },
+  { id: "BILL-2026-011", vendor: "OfficeMart", accountId: "ACC-006", amount: 32000, date: "Jul 08, 2026", dueDate: "Jul 22, 2026", status: "Paid", notes: "Stationery and printer ink" }
 ];
 
 export const initialCustomers = [
@@ -73,107 +54,22 @@ export const initialCustomers = [
 ];
 
 export const initialInvoices = [
-  {
-    id: "INV-2026-001",
-    clientId: "CUST-001",
-    accountId: "ACC-001",
-    client: "Nairobi Academy",
-    clientEmail: "finance@nairobiacademy.ac.ke",
-    clientPhone: "+254 700 111222",
-    clientAddress: "P.O. Box 12345, Nairobi",
-    amount: "450,000",
-    rawAmount: 450000,
-    status: "Paid",
-    date: "Jul 01, 2026",
-    dueDate: "Jul 15, 2026",
-    lineItems: [
-      { description: "Annual Tuition Fee", qty: 10, unitPrice: 40000 },
-      { description: "Transport Fee", qty: 10, unitPrice: 5000 }
-    ],
-    taxRate: 0,
-    notes: "Thank you for your business.",
-    reminders: [],
-  },
-  {
-    id: "INV-2026-002",
-    clientId: "CUST-002",
-    accountId: "ACC-001",
-    client: "Tech Solutions Ltd",
-    clientEmail: "accounts@techsolutions.co.ke",
-    clientPhone: "+254 722 333444",
-    clientAddress: "Westlands, Nairobi",
-    amount: "85,000",
-    rawAmount: 85000,
-    status: "Pending",
-    date: "Jul 10, 2026",
-    dueDate: "Jul 24, 2026",
-    lineItems: [
-      { description: "Software License", qty: 1, unitPrice: 73275 }
-    ],
-    taxRate: 16,
-    notes: "Payment due in 14 days.",
-    reminders: [],
-  },
-  {
-    id: "INV-2026-003",
-    clientId: "CUST-003",
-    accountId: "ACC-001",
-    client: "St. John's Hospital",
-    clientEmail: "billing@stjohns.org",
-    clientPhone: "+254 733 555666",
-    clientAddress: "Upper Hill, Nairobi",
-    amount: "1,250,000",
-    rawAmount: 1250000,
-    status: "Overdue",
-    date: "Jun 01, 2026",
-    dueDate: "Jun 15, 2026",
-    lineItems: [
-      { description: "Medical Equipment Supply", qty: 5, unitPrice: 215517 }
-    ],
-    taxRate: 16,
-    notes: "Please expedite payment.",
-    reminders: [{ sentAt: "2026-06-20T10:00:00Z", method: "Email" as const }],
-  },
-  {
-    id: "INV-2026-004",
-    clientId: "CUST-004",
-    accountId: "ACC-002",
-    client: "Emmanuel Church",
-    clientEmail: "admin@emmanuelchurch.or.ke",
-    clientPhone: "+254 711 777888",
-    clientAddress: "Karen, Nairobi",
-    amount: "120,000",
-    rawAmount: 120000,
-    status: "Paid",
-    date: "Jul 05, 2026",
-    dueDate: "Jul 19, 2026",
-    lineItems: [
-      { description: "Event Catering", qty: 1, unitPrice: 120000 }
-    ],
-    taxRate: 0,
-    notes: "Thanks for trusting us with your event.",
-    reminders: [],
-  },
-  {
-    id: "INV-2026-005",
-    clientId: "CUST-005",
-    accountId: "ACC-001",
-    client: "Legal Associates",
-    clientEmail: "partners@legalassociates.co.ke",
-    clientPhone: "+254 700 999000",
-    clientAddress: "CBD, Nairobi",
-    amount: "350,000",
-    rawAmount: 350000,
-    status: "Pending",
-    date: "Jul 11, 2026",
-    dueDate: "Jul 25, 2026",
-    lineItems: [
-      { description: "Consultation Retainer", qty: 1, unitPrice: 301724 }
-    ],
-    taxRate: 16,
-    notes: "Monthly retainer fee.",
-    reminders: [],
-  },
+  { id: "INV-2026-001", clientId: "CUST-001", accountId: "ACC-001", client: "Nairobi Academy", clientEmail: "finance@nairobiacademy.ac.ke", clientPhone: "+254 700 111222", clientAddress: "P.O. Box 12345, Nairobi", amount: "450,000", rawAmount: 450000, status: "Paid", date: "Mar 01, 2026", dueDate: "Mar 15, 2026", lineItems: [{ description: "Term 1 Tuition", qty: 10, unitPrice: 45000 }], taxRate: 0, notes: "", reminders: [] },
+  { id: "INV-2026-002", clientId: "CUST-002", accountId: "ACC-001", client: "Tech Solutions Ltd", clientEmail: "accounts@techsolutions.co.ke", clientPhone: "+254 722 333444", clientAddress: "Westlands, Nairobi", amount: "85,000", rawAmount: 85000, status: "Paid", date: "Mar 10, 2026", dueDate: "Mar 24, 2026", lineItems: [{ description: "Software License Q1", qty: 1, unitPrice: 73275 }], taxRate: 16, notes: "", reminders: [] },
+  { id: "INV-2026-003", clientId: "CUST-003", accountId: "ACC-001", client: "St. John's Hospital", clientEmail: "billing@stjohns.org", clientPhone: "+254 733 555666", clientAddress: "Upper Hill, Nairobi", amount: "1,250,000", rawAmount: 1250000, status: "Paid", date: "Apr 01, 2026", dueDate: "Apr 15, 2026", lineItems: [{ description: "Medical Equipment Supply", qty: 5, unitPrice: 215517 }], taxRate: 16, notes: "", reminders: [] },
+  { id: "INV-2026-004", clientId: "CUST-004", accountId: "ACC-002", client: "Emmanuel Church", clientEmail: "admin@emmanuelchurch.or.ke", clientPhone: "+254 711 777888", clientAddress: "Karen, Nairobi", amount: "120,000", rawAmount: 120000, status: "Paid", date: "May 05, 2026", dueDate: "May 19, 2026", lineItems: [{ description: "Event Catering", qty: 1, unitPrice: 120000 }], taxRate: 0, notes: "", reminders: [] },
+  { id: "INV-2026-005", clientId: "CUST-005", accountId: "ACC-001", client: "Legal Associates", clientEmail: "partners@legalassociates.co.ke", clientPhone: "+254 700 999000", clientAddress: "CBD, Nairobi", amount: "350,000", rawAmount: 350000, status: "Paid", date: "Jun 11, 2026", dueDate: "Jun 25, 2026", lineItems: [{ description: "Consultation Retainer", qty: 1, unitPrice: 301724 }], taxRate: 16, notes: "", reminders: [] },
+  { id: "INV-2026-006", clientId: "CUST-003", accountId: "ACC-001", client: "St. John's Hospital", clientEmail: "billing@stjohns.org", clientPhone: "+254 733 555666", clientAddress: "Upper Hill, Nairobi", amount: "1,250,000", rawAmount: 1250000, status: "Overdue", date: "Jun 01, 2026", dueDate: "Jun 15, 2026", lineItems: [{ description: "Medical Equipment Supply", qty: 5, unitPrice: 215517 }], taxRate: 16, notes: "Please expedite payment.", reminders: [{ sentAt: "2026-06-20T10:00:00Z", method: "Email" as const }] },
+  { id: "INV-2026-007", clientId: "CUST-001", accountId: "ACC-001", client: "Nairobi Academy", clientEmail: "finance@nairobiacademy.ac.ke", clientPhone: "+254 700 111222", clientAddress: "P.O. Box 12345, Nairobi", amount: "450,000", rawAmount: 450000, status: "Paid", date: "Jul 01, 2026", dueDate: "Jul 15, 2026", lineItems: [{ description: "Term 2 Tuition", qty: 10, unitPrice: 45000 }], taxRate: 0, notes: "", reminders: [] },
+  { id: "INV-2026-008", clientId: "CUST-002", accountId: "ACC-001", client: "Tech Solutions Ltd", clientEmail: "accounts@techsolutions.co.ke", clientPhone: "+254 722 333444", clientAddress: "Westlands, Nairobi", amount: "85,000", rawAmount: 85000, status: "Pending", date: "Jul 10, 2026", dueDate: "Jul 24, 2026", lineItems: [{ description: "Software License Q3", qty: 1, unitPrice: 73275 }], taxRate: 16, notes: "Payment due in 14 days.", reminders: [] },
+  { id: "INV-2026-009", clientId: "CUST-005", accountId: "ACC-001", client: "Legal Associates", clientEmail: "partners@legalassociates.co.ke", clientPhone: "+254 700 999000", clientAddress: "CBD, Nairobi", amount: "350,000", rawAmount: 350000, status: "Pending", date: "Jul 11, 2026", dueDate: "Jul 25, 2026", lineItems: [{ description: "Consultation Retainer", qty: 1, unitPrice: 301724 }], taxRate: 16, notes: "Monthly retainer fee.", reminders: [] }
+];
+
+export const initialPayrollHistory = [
+  { id: "PR-2026-03", period: "Mar 2026", totalGross: 540000, totalNet: 395000, employeeCount: 4, disbursedAt: "2026-03-25T10:00:00Z" },
+  { id: "PR-2026-04", period: "Apr 2026", totalGross: 540000, totalNet: 395000, employeeCount: 4, disbursedAt: "2026-04-26T10:00:00Z" },
+  { id: "PR-2026-05", period: "May 2026", totalGross: 540000, totalNet: 395000, employeeCount: 4, disbursedAt: "2026-05-25T10:00:00Z" },
+  { id: "PR-2026-06", period: "Jun 2026", totalGross: 540000, totalNet: 395000, employeeCount: 4, disbursedAt: "2026-06-25T10:00:00Z" }
 ];
 
 export const initialStaffData = [
