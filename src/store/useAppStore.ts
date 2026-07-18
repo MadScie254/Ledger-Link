@@ -9,7 +9,8 @@ import {
   initialCustomers,
   initialAccounts,
   initialBills,
-  initialActivityLog
+  initialActivityLog,
+  initialPayrollHistory
 } from '@/lib/mockData';
 
 export interface OrgProfile {
@@ -100,6 +101,7 @@ export interface Invoice {
   taxRate: number;
   notes: string;
   reminders: InvoiceReminder[];
+  recurring?: { frequency: "Weekly" | "Monthly" | "Termly", nextDate: string };
 }
 
 interface AppState {
@@ -209,7 +211,18 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           const lastNum = state.bills.length;
           const nextId = `BILL-2026-${String(lastNum + 1).padStart(3, '0')}`;
-          return { bills: [...state.bills, { ...bill, id: nextId } as Bill] };
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Bill Created",
+            title: nextId,
+            description: `New bill logged for ${bill.vendor} (KES ${bill.amount.toLocaleString()})`,
+            timestamp: new Date().toISOString(),
+            icon: "receipt",
+          };
+          return { 
+            bills: [...state.bills, { ...bill, id: nextId } as Bill],
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
         }),
       markBillPaid: (id) =>
         set((state) => {
@@ -287,14 +300,25 @@ export const useAppStore = create<AppState>()(
           };
         }),
       addReminder: (id, method) =>
-        set((state) => ({
-          invoices: state.invoices.map((inv) => 
-            inv.id === id ? { 
-              ...inv, 
-              reminders: [...inv.reminders, { sentAt: new Date().toISOString(), method }] 
-            } : inv
-          )
-        })),
+        set((state) => {
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Reminder Sent",
+            title: id,
+            description: `Payment reminder sent via ${method}`,
+            timestamp: new Date().toISOString(),
+            icon: "bell",
+          };
+          return {
+            invoices: state.invoices.map((inv) => 
+              inv.id === id ? { 
+                ...inv, 
+                reminders: [...inv.reminders, { sentAt: new Date().toISOString(), method }] 
+              } : inv
+            ),
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
+        }),
 
       staff: initialStaffData,
       setStaff: (staff) => set({ staff }),
@@ -310,29 +334,51 @@ export const useAppStore = create<AppState>()(
 
       movements: [],
       addMovement: (movement) => 
-        set((state) => ({
-          movements: [
-            {
-              ...movement,
-              id: Math.random().toString(36).substring(2, 9),
-              timestamp: new Date().toISOString(),
-            },
-            ...state.movements,
-          ]
-        })),
+        set((state) => {
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Inventory Movement",
+            title: movement.itemName,
+            description: `${movement.delta > 0 ? 'Added' : 'Removed'} ${Math.abs(movement.delta)} units`,
+            timestamp: new Date().toISOString(),
+            icon: "package",
+          };
+          return {
+            movements: [
+              {
+                ...movement,
+                id: Math.random().toString(36).substring(2, 9),
+                timestamp: new Date().toISOString(),
+              },
+              ...state.movements,
+            ],
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
+        }),
 
-      payrollHistory: [],
+      payrollHistory: initialPayrollHistory,
       disbursePayroll: (entry) => 
-        set((state) => ({
-          payrollHistory: [
-            {
-              ...entry,
-              id: Math.random().toString(36).substring(2, 9),
-              disbursedAt: new Date().toISOString(),
-            },
-            ...state.payrollHistory,
-          ]
-        })),
+        set((state) => {
+          const act = {
+            id: Math.random().toString(36).substring(2, 9),
+            type: "Payroll Disbursed",
+            title: entry.period,
+            description: `Payroll run for ${entry.employeeCount} employees (Net: KES ${entry.totalNet.toLocaleString()})`,
+            timestamp: new Date().toISOString(),
+            icon: "users",
+          };
+          return {
+            payrollHistory: [
+              {
+                ...entry,
+                id: Math.random().toString(36).substring(2, 9),
+                disbursedAt: new Date().toISOString(),
+              },
+              ...state.payrollHistory,
+            ],
+            activityLog: [act, ...state.activityLog].slice(0, 100)
+          };
+        }),
 
       mpesaTransactions: initialMpesaTransactions,
       updateMpesaTransaction: (id, updates) => 
