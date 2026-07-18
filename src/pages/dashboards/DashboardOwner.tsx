@@ -436,7 +436,15 @@ export function DashboardOwner() {
             Morning, {isFinance ? "Finance Manager" : "Owner"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Wednesday, 12th June 2026
+            {(() => {
+              const now = new Date();
+              const weekday = now.toLocaleDateString("en-US", { weekday: "long" });
+              const day = now.getDate();
+              const suffix = ([11,12,13].includes(day) ? "th" : { 1:"st", 2:"nd", 3:"rd" }[day % 10] || "th");
+              const month = now.toLocaleDateString("en-US", { month: "long" });
+              const year = now.getFullYear();
+              return `${weekday}, ${day}${suffix} ${month} ${year}`;
+            })()}
           </p>
         </div>
       </div>

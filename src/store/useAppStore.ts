@@ -385,7 +385,20 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'ledgerlink-app-store',
-      partialize: (state) => ({ orgProfile: state.orgProfile }),
+      partialize: (state) => ({
+        orgProfile: state.orgProfile,
+        invoices: state.invoices,
+        customers: state.customers,
+        accounts: state.accounts,
+        bills: state.bills,
+        staff: state.staff,
+        inventory: state.inventory,
+        movements: state.movements,
+        payrollHistory: state.payrollHistory,
+        mpesaTransactions: state.mpesaTransactions,
+        bankTransactions: state.bankTransactions,
+        activityLog: state.activityLog,
+      }),
     }
   )
 );

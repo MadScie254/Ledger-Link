@@ -27,6 +27,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   const invoices = useAppStore((state) => state.invoices);
   const bills = useAppStore((state) => state.bills);
   const accounts = useAppStore((state) => state.accounts);
+  const inventory = useAppStore((state) => state.inventory);
+  const staff = useAppStore((state) => state.staff);
   const { theme, setTheme } = useTheme();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,6 +69,54 @@ export function Header({ onMenuClick }: HeaderProps) {
 
     return results.slice(0, 8);
   }, [searchQuery, customers, invoices, bills, accounts]);
+
+  const notifications = React.useMemo(() => {
+    const items: { id: string; label: string; detail: string; link: string }[] = [];
+    const now = new Date();
+
+    // Overdue invoices (status "Overdue" or Pending past dueDate)
+    invoices.forEach(inv => {
+      if (inv.status === "Overdue") {
+        items.push({ id: `inv-od-${inv.id}`, label: `Invoice ${inv.id} overdue`, detail: `${inv.client} · KES ${inv.amount}`, link: "/invoicing" });
+      } else if (inv.status === "Pending") {
+        const due = new Date(inv.dueDate);
+        if (!isNaN(due.getTime()) && due < now) {
+          items.push({ id: `inv-pd-${inv.id}`, label: `Invoice ${inv.id} past due`, detail: `${inv.client} · KES ${inv.amount}`, link: "/invoicing" });
+        }
+      }
+    });
+
+    // Low-stock inventory (qty <= minQty)
+    inventory.forEach(item => {
+      if (item.qty <= item.minQty) {
+        items.push({ id: `inv-ls-${item.id}`, label: `${item.name} low stock`, detail: `${item.qty} / ${item.minQty} ${item.unit} remaining`, link: "/inventory" });
+      }
+    });
+
+    // Overdue unpaid bills
+    bills.forEach(bill => {
+      if (bill.status === "Unpaid") {
+        const due = new Date(bill.dueDate);
+        if (!isNaN(due.getTime()) && due < now) {
+          items.push({ id: `bill-od-${bill.id}`, label: `Bill ${bill.id} overdue`, detail: `${bill.vendor} · KES ${bill.amount.toLocaleString()}`, link: "/accounting" });
+        }
+      }
+    });
+
+    // Payroll due within 5 days (active staff exist and no recent disbursement)
+    const activeStaffCount = staff.filter(s => s.status === "Active").length;
+    if (activeStaffCount > 0) {
+      const dayOfMonth = now.getDate();
+      // Payroll is typically due at end of month; alert if within last 5 days
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      if (dayOfMonth >= daysInMonth - 5) {
+        const totalGross = staff.filter(s => s.status === "Active").reduce((sum, s) => sum + s.gross, 0);
+        items.push({ id: "payroll-due", label: "Payroll due soon", detail: `${activeStaffCount} staff · KES ${totalGross.toLocaleString()}`, link: "/payroll" });
+      }
+    }
+
+    return items;
+  }, [invoices, inventory, bills, staff]);
 
   const handleNotImplemented = (action: string) => {
     toast.info(`${action} is not implemented in this demo.`);
@@ -149,18 +199,33 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger className="relative flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none cursor-pointer">
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-background bg-amber-500"></span>
+            {notifications.length > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">{notifications.length > 9 ? '9+' : notifications.length}</span>
+            )}
             <span className="sr-only">View notifications</span>
             <Bell className="h-4 w-4" aria-hidden="true" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
+          <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel>Notifications{notifications.length > 0 && ` (${notifications.length})`}</DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <div className="p-4 text-sm text-center text-muted-foreground">
-              No new notifications.
-            </div>
+            {notifications.length > 0 ? (
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.map((n) => (
+                  <Link key={n.id} to={n.link} className="block">
+                    <DropdownMenuItem className="flex flex-col items-start gap-0.5 cursor-pointer">
+                      <span className="text-sm font-medium text-foreground">{n.label}</span>
+                      <span className="text-xs text-muted-foreground">{n.detail}</span>
+                    </DropdownMenuItem>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-sm text-center text-muted-foreground">
+                No new notifications.
+              </div>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 

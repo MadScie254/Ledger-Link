@@ -238,6 +238,24 @@ export function Settings() {
             </Button>
           </div>
         </div>
+
+        <div className="rounded-xl border border-destructive/30 bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-card-foreground border-b border-border pb-2">Reset Demo Data</h3>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Clear all saved state and restore the original mock data. This is useful for resetting between client demos.
+          </p>
+          <Button 
+            variant="outline" 
+            className="text-destructive hover:bg-destructive/10 border-destructive/30"
+            onClick={() => {
+              localStorage.removeItem('ledgerlink-app-store');
+              toast.success("Demo data reset. Reloading...");
+              setTimeout(() => window.location.reload(), 500);
+            }}
+          >
+            Reset Demo Data
+          </Button>
+        </div>
       </div>
     </div>
   );
