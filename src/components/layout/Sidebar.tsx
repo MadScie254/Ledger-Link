@@ -8,6 +8,7 @@ import {
   Settings,
   X,
   PieChart,
+  List,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppStore } from "@/store/useAppStore";
@@ -22,6 +23,7 @@ const navigation = [
   { name: "Inventory", href: "/app/inventory", icon: Package, roles: ["owner", "finance", "board"] },
   { name: "Accounting", href: "/app/accounting", icon: LineChart, roles: ["owner", "finance", "board"] },
   { name: "Reports", href: "/app/reports", icon: PieChart, roles: ["owner", "finance", "board"] },
+  { name: "Activity Log", href: "/app/activity", icon: List, roles: ["owner", "board"] },
   { name: "Settings", href: "/app/settings", icon: Settings, roles: ["owner"] },
 ];
 
