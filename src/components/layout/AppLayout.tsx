@@ -10,6 +10,7 @@ import { Inventory } from "@/pages/Inventory";
 import { Accounting } from "@/pages/Accounting";
 import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
+import { ActivityLog } from "@/pages/ActivityLog";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AIAssistant } from "@/components/AIAssistant";
 
@@ -33,6 +34,7 @@ export function AppLayout() {
               <Route path="/accounting/*" element={<Accounting />} />
               <Route path="/reports/*" element={<Reports />} />
               <Route path="/settings/*" element={<Settings />} />
+              <Route path="/activity/*" element={<ActivityLog />} />
               <Route path="*" element={
                 <div className="flex h-full items-center justify-center text-slate-500">
                   <p>Module is under construction.</p>
