@@ -45,25 +45,25 @@ export function Header({ onMenuClick }: HeaderProps) {
     
     customers.forEach(c => {
       if (c.name.toLowerCase().includes(query) || c.id.toLowerCase().includes(query)) {
-        results.push({ type: "Client", id: c.id, title: c.name, subtitle: c.sector, link: `/clients?highlight=${c.id}` });
+        results.push({ type: "Client", id: c.id, title: c.name, subtitle: c.sector, link: `/app/clients?highlight=${c.id}` });
       }
     });
     
     invoices.forEach(i => {
       if (i.client.toLowerCase().includes(query) || i.id.toLowerCase().includes(query)) {
-        results.push({ type: "Invoice", id: i.id, title: `${i.id} - ${i.client}`, subtitle: `KES ${i.amount}`, link: `/invoicing?highlight=${i.id}` });
+        results.push({ type: "Invoice", id: i.id, title: `${i.id} - ${i.client}`, subtitle: `KES ${i.amount}`, link: `/app/invoicing?highlight=${i.id}` });
       }
     });
 
     bills.forEach(b => {
       if (b.vendor.toLowerCase().includes(query) || b.id.toLowerCase().includes(query)) {
-        results.push({ type: "Bill", id: b.id, title: `${b.id} - ${b.vendor}`, subtitle: `KES ${b.amount.toLocaleString()}`, link: `/accounting?tab=bills&highlight=${b.id}` });
+        results.push({ type: "Bill", id: b.id, title: `${b.id} - ${b.vendor}`, subtitle: `KES ${b.amount.toLocaleString()}`, link: `/app/accounting?tab=bills&highlight=${b.id}` });
       }
     });
 
     accounts.forEach(a => {
       if (a.name.toLowerCase().includes(query)) {
-        results.push({ type: "Account", id: a.id, title: a.name, subtitle: a.type, link: `/settings?highlight=${a.id}` });
+        results.push({ type: "Account", id: a.id, title: a.name, subtitle: a.type, link: `/app/settings?highlight=${a.id}` });
       }
     });
 
@@ -77,11 +77,11 @@ export function Header({ onMenuClick }: HeaderProps) {
     // Overdue invoices (status "Overdue" or Pending past dueDate)
     invoices.forEach(inv => {
       if (inv.status === "Overdue") {
-        items.push({ id: `inv-od-${inv.id}`, label: `Invoice ${inv.id} overdue`, detail: `${inv.client} · KES ${inv.amount}`, link: `/invoicing?highlight=${inv.id}` });
+        items.push({ id: `inv-od-${inv.id}`, label: `Invoice ${inv.id} overdue`, detail: `${inv.client} · KES ${inv.amount}`, link: `/app/invoicing?highlight=${inv.id}` });
       } else if (inv.status === "Pending") {
         const due = new Date(inv.dueDate);
         if (!isNaN(due.getTime()) && due < now) {
-          items.push({ id: `inv-pd-${inv.id}`, label: `Invoice ${inv.id} past due`, detail: `${inv.client} · KES ${inv.amount}`, link: `/invoicing?highlight=${inv.id}` });
+          items.push({ id: `inv-pd-${inv.id}`, label: `Invoice ${inv.id} past due`, detail: `${inv.client} · KES ${inv.amount}`, link: `/app/invoicing?highlight=${inv.id}` });
         }
       }
     });
@@ -89,7 +89,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     // Low-stock inventory (qty <= minQty)
     inventory.forEach(item => {
       if (item.qty <= item.minQty) {
-        items.push({ id: `inv-ls-${item.id}`, label: `${item.name} low stock`, detail: `${item.qty} / ${item.minQty} ${item.unit} remaining`, link: `/inventory?highlight=${item.id}` });
+        items.push({ id: `inv-ls-${item.id}`, label: `${item.name} low stock`, detail: `${item.qty} / ${item.minQty} ${item.unit} remaining`, link: `/app/inventory?highlight=${item.id}` });
       }
     });
 
@@ -98,7 +98,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       if (bill.status === "Unpaid") {
         const due = new Date(bill.dueDate);
         if (!isNaN(due.getTime()) && due < now) {
-          items.push({ id: `bill-od-${bill.id}`, label: `Bill ${bill.id} overdue`, detail: `${bill.vendor} · KES ${bill.amount.toLocaleString()}`, link: `/accounting?tab=bills&highlight=${bill.id}` });
+          items.push({ id: `bill-od-${bill.id}`, label: `Bill ${bill.id} overdue`, detail: `${bill.vendor} · KES ${bill.amount.toLocaleString()}`, link: `/app/accounting?tab=bills&highlight=${bill.id}` });
         }
       }
     });
@@ -111,7 +111,7 @@ export function Header({ onMenuClick }: HeaderProps) {
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       if (dayOfMonth >= daysInMonth - 5) {
         const totalGross = staff.filter(s => s.status === "Active").reduce((sum, s) => sum + s.gross, 0);
-        items.push({ id: "payroll-due", label: "Payroll due soon", detail: `${activeStaffCount} staff · KES ${totalGross.toLocaleString()}`, link: "/payroll?highlight=payroll-due" });
+        items.push({ id: "payroll-due", label: "Payroll due soon", detail: `${activeStaffCount} staff · KES ${totalGross.toLocaleString()}`, link: "/app/payroll?highlight=payroll-due" });
       }
     }
 

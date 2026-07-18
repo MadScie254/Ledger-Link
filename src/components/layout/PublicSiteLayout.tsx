@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" },
   { label: "Contact", href: "/contact" },
 ];
@@ -16,7 +16,7 @@ const footerColumns = [
     links: [
       { label: "Features", href: "/#features" },
       { label: "How it works", href: "/#how-it-works" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Pricing", href: "/#pricing" },
       { label: "Sectors", href: "/#sectors" },
     ],
   },
@@ -53,11 +53,17 @@ export function PublicHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
-          {navLinks.map((link) => (
-            <Link key={link.label} to={link.href} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => 
+            link.href.startsWith("/#") ? (
+              <a key={link.label} href={link.href} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.label} to={link.href} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+                {link.label}
+              </Link>
+            )
+          )}
           <Link to="/app">
             <Button size="sm" className="rounded-full px-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               Login / Get Started <ArrowRight className="ml-2 h-4 w-4" />
@@ -95,9 +101,15 @@ export function PublicFooter() {
                 <ul className="mt-4 space-y-3">
                   {column.links.map((link) => (
                     <li key={link.label}>
-                      <Link to={link.href} className="text-sm text-slate-400 transition-colors hover:text-white">
-                        {link.label}
-                      </Link>
+                      {link.href.startsWith("/#") ? (
+                        <a href={link.href} className="text-sm text-slate-400 transition-colors hover:text-white">
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link to={link.href} className="text-sm text-slate-400 transition-colors hover:text-white">
+                          {link.label}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -126,11 +138,11 @@ export function PublicFooter() {
             <Link to="/contact">
               <Button className="rounded-full px-5">Contact us</Button>
             </Link>
-            <Link to="/pricing">
+            <a href="/#pricing" className="inline-flex">
               <Button variant="outline" className="rounded-full border-white/20 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white">
                 View pricing
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
