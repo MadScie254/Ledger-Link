@@ -9,9 +9,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare, FileText } from "lucide-react";
+import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare, FileText, Repeat } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useAppStore, type Invoice, type InvoiceLineItem } from "@/store/useAppStore";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -91,6 +92,9 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([{ ...emptyLineItem }]);
   const [taxRate, setTaxRate] = useState(16);
   const [notes, setNotes] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringFrequency, setRecurringFrequency] = useState<"Weekly" | "Monthly" | "Termly">("Monthly");
+  const [recurringNextDate, setRecurringNextDate] = useState("");
 
   const subtotal = lineItems.reduce((sum, li) => sum + li.qty * li.unitPrice, 0);
   const tax = subtotal * (taxRate / 100);
@@ -167,6 +171,7 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
       lineItems,
       taxRate,
       notes,
+      ...(isRecurring && recurringNextDate ? { recurring: { frequency: recurringFrequency, nextDate: recurringNextDate } } : {})
     });
 
     toast.success("Invoice created successfully.");
@@ -175,6 +180,9 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     setIsNewClientMode(false);
     setClientId(""); setClient(""); setClientEmail(""); setClientPhone(""); setClientAddress("");
     setLineItems([{ ...emptyLineItem }]); setNotes(""); setDueDate("");
+    setIsRecurring(false);
+    setRecurringFrequency("Monthly");
+    setRecurringNextDate("");
   };
 
   const inputCls = "w-full rounded-md border border-input bg-background py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary";
@@ -227,6 +235,30 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Due Date *</label>
               <input className={inputCls} type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
+          </div>
+
+          {/* Recurring */}
+          <div className="border border-border rounded-md p-4 bg-muted/30">
+            <label className="flex items-center gap-2 cursor-pointer mb-2">
+              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="rounded border-input text-primary focus:ring-primary h-4 w-4" />
+              <span className="text-sm font-medium text-foreground">Make this invoice recurring</span>
+            </label>
+            {isRecurring && (
+              <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-border">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Frequency</label>
+                  <select className={inputCls} value={recurringFrequency} onChange={(e) => setRecurringFrequency(e.target.value as any)}>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Termly">Termly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Next Generation Date</label>
+                  <input className={inputCls} type="date" value={recurringNextDate} onChange={(e) => setRecurringNextDate(e.target.value)} />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Line Items */}
@@ -418,16 +450,15 @@ function InvoiceDetailDialog({ invoice, open, onOpenChange }: { invoice: Invoice
 // ---------- Main Component ----------
 
 export function Invoicing() {
-  const { invoices, updateInvoiceStatus, addReminder, orgProfile } = useAppStore();
+  const { invoices, addReminder, updateInvoiceStatus, addInvoice } = useAppStore();
   const [filter, setFilter] = useState("All");
-  const [sortField, setSortField] = useState<SortField>("date");
+  const [sortField, setSortField] = useState<SortField>("id");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Dialog states
   const [newInvoiceOpen, setNewInvoiceOpen] = useState(false);
   const [detailInvoice, setDetailInvoice] = useState<Invoice | null>(null);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all-invoices");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 500);
@@ -484,8 +515,39 @@ export function Invoicing() {
     toast.success("Invoice marked as paid.");
   };
 
+  const handleGenerateRecurring = (template: Invoice) => {
+    if (!template.recurring) return;
+    
+    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    const due = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }); // 14 days later
+    
+    // Create actual invoice
+    const newInvoiceParams = {
+      clientId: template.clientId,
+      client: template.client,
+      clientEmail: template.clientEmail,
+      clientPhone: template.clientPhone,
+      clientAddress: template.clientAddress,
+      date: today,
+      dueDate: due,
+      lineItems: template.lineItems,
+      taxRate: template.taxRate,
+      notes: template.notes,
+      // intentionally omit recurring here so the generated invoice is normal
+    };
+    
+    addInvoice(newInvoiceParams);
+    
+    // Optional logic to advance template date could go here if we were persisting templates differently,
+    // but in this demo, adding a new invoice is sufficient to prove the workflow.
+    toast.success("Recurring invoice generated successfully.");
+  };
+
+  const standardInvoices = useMemo(() => invoices.filter(i => !i.recurring), [invoices]);
+  const recurringTemplates = useMemo(() => invoices.filter(i => i.recurring), [invoices]);
+
   const filteredAndSortedInvoices = useMemo(() => {
-    let result = [...invoices];
+    let result = [...standardInvoices];
 
     if (filter !== "All") {
       result = result.filter((inv) => inv.status === filter);
@@ -501,7 +563,7 @@ export function Invoicing() {
     });
 
     return result;
-  }, [invoices, filter, sortField, sortOrder]);
+  }, [standardInvoices, filter, sortField, sortOrder]);
 
   if (isLoading) return <InvoicingSkeleton />;
 
@@ -527,24 +589,37 @@ export function Invoicing() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        {["All", "Paid", "Pending", "Overdue"].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-              filter === status
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            {status}
-          </button>
-        ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between shrink-0 mb-4">
+          <TabsList>
+            <TabsTrigger value="all-invoices">All Invoices</TabsTrigger>
+            <TabsTrigger value="recurring">Recurring Templates</TabsTrigger>
+          </TabsList>
+          
+          {activeTab === "all-invoices" && (
+            <div className="flex items-center gap-2">
+              {["All", "Paid", "Pending", "Overdue"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilter(status)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                    filter === status
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <TabsContent value="all-invoices" className="flex-1 flex flex-col min-h-0 m-0 data-[state=inactive]:hidden">
+          <div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-y-auto">
           <Table>
             <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
               <TableRow>
@@ -653,6 +728,62 @@ export function Invoicing() {
           </Table>
         </div>
       </div>
+      </TabsContent>
+
+      <TabsContent value="recurring" className="flex-1 flex flex-col min-h-0 m-0 data-[state=inactive]:hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            <Table>
+              <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
+                <TableRow>
+                  <TableHead>Template ID</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Frequency</TableHead>
+                  <TableHead>Next Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recurringTemplates.map((template) => (
+                  <TableRow key={template.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium text-primary cursor-pointer hover:underline" onClick={() => setDetailInvoice(template)}>
+                      {template.id}
+                    </TableCell>
+                    <TableCell className="font-medium text-card-foreground">{template.client}</TableCell>
+                    <TableCell>KES {template.amount}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary border-none">
+                        <Repeat className="h-3 w-3 mr-1" />
+                        {template.recurring?.frequency}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{template.recurring?.nextDate}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => handleGenerateRecurring(template)}>
+                        Generate Now
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {recurringTemplates.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <EmptyState 
+                        icon={Repeat} 
+                        message="No recurring templates found." 
+                        actionLabel="Create Template" 
+                        onAction={() => { setActiveTab("all-invoices"); setNewInvoiceOpen(true); }} 
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       <NewInvoiceDialog open={newInvoiceOpen} onOpenChange={setNewInvoiceOpen} />
