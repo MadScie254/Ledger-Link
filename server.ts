@@ -49,6 +49,27 @@ Keep your answers concise, formatting numbers as currency where appropriate. If 
 
   });
 
+  app.post("/api/contact", (req, res) => {
+    const { name, organization, email, message } = req.body ?? {};
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "Name, email, and message are required." });
+    }
+
+    console.log("Contact request received:", {
+      name,
+      organization,
+      email,
+      message,
+      receivedAt: new Date().toISOString(),
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Thanks for reaching out. We will get back to you soon.",
+    });
+  });
+
   // M-Pesa Webhook & Payments
   app.post("/api/mpesa/webhook", (req, res) => {
     console.log("M-Pesa Webhook received:", req.body);
@@ -88,7 +109,7 @@ Keep your answers concise, formatting numbers as currency where appropriate. If 
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

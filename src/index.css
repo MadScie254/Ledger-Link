@@ -138,5 +138,35 @@
     }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
     }
+}
+
+@layer utilities {
+  .hero-word {
+    animation: hero-word-cycle 2.8s ease-in-out;
+  }
+}
+
+@keyframes hero-word-cycle {
+  0% {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(6px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-0.2em);
+    filter: blur(4px);
+  }
 }
