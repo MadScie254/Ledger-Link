@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import "dotenv/config";
+import { GoogleGenAI } from "@google/genai";
 
 async function startServer() {
   const app = express();
@@ -12,6 +14,38 @@ async function startServer() {
   // API routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // AI Chat Endpoint
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message, context } = req.body;
+      
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
+      }
+
+      const ai = new GoogleGenAI({});
+      
+      const systemInstruction = `You are a helpful, professional AI Financial Assistant for Ledger-Link, a financial management application.
+Use the following JSON data representing the user's current app state to answer their questions accurately:
+${JSON.stringify(context)}
+
+Keep your answers concise, formatting numbers as currency where appropriate. If the user asks something unrelated to their finances or Ledger-Link, gently guide them back.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: message,
+        config: {
+          systemInstruction: systemInstruction,
+        }
+      });
+
+      res.json({ text: response.text });
+    } catch (error) {
+      console.error("AI Chat Error:", error);
+      res.status(500).json({ error: "Failed to process AI request." });
+    }
   });
 
   // M-Pesa Webhook & Payments

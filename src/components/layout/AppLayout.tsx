@@ -11,6 +11,7 @@ import { Accounting } from "@/pages/Accounting";
 import { Reports } from "@/pages/Reports";
 import { Settings } from "@/pages/Settings";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AIAssistant } from "@/components/AIAssistant";
 
 export function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -41,6 +42,7 @@ export function AppLayout() {
           </ErrorBoundary>
         </main>
       </div>
+      <AIAssistant />
     </div>
   );
 }
