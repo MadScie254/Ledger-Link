@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Building2, Search, FileText } from "lucide-react";
+import { Building2, Search, FileText, Users } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
   Table,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function ClientsSkeleton() {
   return (
@@ -147,8 +148,11 @@ export function Clients() {
                 ))}
                 {clientsWithStats.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No clients found.
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <EmptyState 
+                        icon={Users} 
+                        message="No clients found." 
+                      />
                     </TableCell>
                   </TableRow>
                 )}

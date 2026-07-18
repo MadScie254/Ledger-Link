@@ -268,10 +268,22 @@ export function Payroll() {
                         <TableHead>Name</TableHead>
                         <TableHead>Gross</TableHead>
                         <TableHead>Taxable</TableHead>
-                        <TableHead>PAYE</TableHead>
-                        <TableHead>NSSF</TableHead>
-                        <TableHead>SHIF</TableHead>
-                        <TableHead>AHL</TableHead>
+                        <TableHead>
+                          <div>PAYE</div>
+                          <div className="text-[10px] font-normal text-muted-foreground uppercase tracking-normal">Income Tax</div>
+                        </TableHead>
+                        <TableHead>
+                          <div>NSSF</div>
+                          <div className="text-[10px] font-normal text-muted-foreground uppercase tracking-normal">Pension</div>
+                        </TableHead>
+                        <TableHead>
+                          <div>SHIF</div>
+                          <div className="text-[10px] font-normal text-muted-foreground uppercase tracking-normal">Health</div>
+                        </TableHead>
+                        <TableHead>
+                          <div>AHL</div>
+                          <div className="text-[10px] font-normal text-muted-foreground uppercase tracking-normal">Housing</div>
+                        </TableHead>
                         <TableHead className="font-bold text-foreground">Net Pay</TableHead>
                         <TableHead className="text-right">Payslip</TableHead>
                       </TableRow>

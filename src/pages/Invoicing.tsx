@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare, FileText } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useAppStore, type Invoice, type InvoiceLineItem } from "@/store/useAppStore";
 import { toast } from "sonner";
@@ -638,8 +639,13 @@ export function Invoicing() {
               ))}
               {filteredAndSortedInvoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No invoices found.
+                  <TableCell colSpan={6} className="text-center py-8">
+                    <EmptyState 
+                      icon={FileText} 
+                      message="No invoices found." 
+                      actionLabel="Create Invoice" 
+                      onAction={() => setNewInvoiceOpen(true)} 
+                    />
                   </TableCell>
                 </TableRow>
               )}

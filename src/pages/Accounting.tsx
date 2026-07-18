@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet, Receipt, Plus } from "lucide-react";
+import { ArrowRightLeft, FileCheck, Landmark, Smartphone, FileSpreadsheet, Receipt, Plus, CreditCard } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
   Table,
@@ -20,6 +20,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 
 export function Accounting() {
@@ -301,8 +302,11 @@ export function Accounting() {
                 ))}
                 {mpesaTransactions.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No M-Pesa transactions found.
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <EmptyState 
+                        icon={Smartphone} 
+                        message="No M-Pesa transactions found." 
+                      />
                     </TableCell>
                   </TableRow>
                 )}
@@ -351,8 +355,11 @@ export function Accounting() {
                 ))}
                 {bankTransactions.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No bank transactions found.
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <EmptyState 
+                        icon={CreditCard} 
+                        message="No Bank transactions found." 
+                      />
                     </TableCell>
                   </TableRow>
                 )}
@@ -408,8 +415,11 @@ export function Accounting() {
                 })}
                 {bills.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No bills found.
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <EmptyState 
+                        icon={Receipt} 
+                        message="No bills found." 
+                      />
                     </TableCell>
                   </TableRow>
                 )}

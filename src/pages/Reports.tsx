@@ -9,7 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 function ReportsSkeleton() {
   return (
@@ -129,7 +131,12 @@ export function Reports() {
                 </TableRow>
                 {incomeGroups.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-muted-foreground italic pl-6 py-2">No income recorded.</TableCell>
+                    <TableCell colSpan={2} className="text-center py-8">
+                      <EmptyState 
+                        icon={TrendingUp} 
+                        message="No income data found." 
+                      />
+                    </TableCell>
                   </TableRow>
                 ) : (
                   incomeGroups.map((g, i) => (
@@ -152,7 +159,12 @@ export function Reports() {
                 </TableRow>
                 {expenseGroups.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-muted-foreground italic pl-6 py-2">No expenses recorded.</TableCell>
+                    <TableCell colSpan={2} className="text-center py-8">
+                      <EmptyState 
+                        icon={TrendingDown} 
+                        message="No expense data found." 
+                      />
+                    </TableCell>
                   </TableRow>
                 ) : (
                   expenseGroups.map((g, i) => (

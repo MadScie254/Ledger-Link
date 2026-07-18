@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, AlertTriangle, ArrowRightLeft, Search, Check, X } from "lucide-react";
+import { Plus, Minus, AlertTriangle, ArrowRightLeft, Search, Check, X, History, PackageOpen } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
   Table,
@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function InventorySkeleton() {
   return (
@@ -163,13 +164,16 @@ export function Inventory() {
                               {m.delta > 0 ? '+' : ''}{m.delta}
                             </Badge>
                           </TableCell>
-                          <TableCell>{m.reason}</TableCell>
+                          <TableCell className="text-muted-foreground">{m.reason}</TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                          No movements recorded yet.
+                        <TableCell colSpan={4} className="text-center py-8">
+                          <EmptyState 
+                            icon={History} 
+                            message="No inventory movements found." 
+                          />
                         </TableCell>
                       </TableRow>
                     )}
@@ -297,8 +301,11 @@ export function Inventory() {
               })}
               {filteredInventory.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No items found.
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <EmptyState 
+                      icon={PackageOpen} 
+                      message="No items found." 
+                    />
                   </TableCell>
                 </TableRow>
               )}
