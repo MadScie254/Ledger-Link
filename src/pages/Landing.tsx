@@ -350,9 +350,9 @@ export function Landing() {
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <div>
               <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">How it works</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">A simple path from setup to control.</h2>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Up and running in four steps.</h2>
               <p className="mt-4 text-lg leading-8 text-slate-600">
-                The page is clearer when visitors can see the workflow in plain language. These steps reduce friction and explain what happens next.
+                No complex setup. No consultants. Create your organization, pick your sector, and start working with clean books from day one.
               </p>
             </div>
 
@@ -365,7 +365,7 @@ export function Landing() {
                   <div>
                     <p className="text-base font-semibold text-slate-950">{step}</p>
                     <p className="mt-1 text-sm leading-6 text-slate-500">
-                      Each step keeps the interface focused so teams can adopt the product without a long learning curve.
+                      Quick and focused — most teams are operational within the first session.
                     </p>
                   </div>
                 </div>
@@ -378,9 +378,9 @@ export function Landing() {
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_1fr] lg:items-start">
             <div>
               <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">Trust and security</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Built for Kenyan compliance, backed by a tidy workflow.</h2>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Built for Kenyan compliance, backed by clear audit trails.</h2>
               <p className="mt-4 text-lg leading-8 text-slate-600">
-                The app should make teams feel in control, not exposed. That means clear audit trails, sensible role separation, and a product story that is easy to explain to managers.
+                Every action is logged, roles keep sensitive data protected, and the entire system follows Kenyan tax and payroll regulations out of the box.
               </p>
             </div>
 
@@ -400,11 +400,37 @@ export function Landing() {
           </div>
         </section>
 
-        <section id="testimonials" className="scroll-mt-24 px-6 py-24 bg-slate-50">
+        <section id="sectors" className="scroll-mt-24 px-6 py-24 bg-slate-50">
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-3xl text-center mx-auto">
+              <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">Sectors</Badge>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Purpose-built for the organizations you run.</h2>
+              <p className="mt-4 text-lg leading-8 text-slate-600">
+                Every sector has different financial rhythms. LedgerLink adapts its workflows — fees, tithes, retainers, or patient billing — so your books match how you actually operate.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {sectors.map((sector) => (
+                <Card key={sector.title} className="group border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <CardContent className="p-6">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${sector.color}`}>
+                      <sector.icon className="h-7 w-7" />
+                    </div>
+                    <h3 className="mt-5 text-xl font-bold text-slate-950">{sector.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{sector.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="testimonials" className="scroll-mt-24 px-6 py-24 bg-white border-y border-slate-200">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">Trusted by teams like yours</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Placeholder quotes that make the value easier to picture.</h2>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Hear from teams already using LedgerLink.</h2>
             </div>
 
             <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -428,19 +454,19 @@ export function Landing() {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-24 px-6 py-24 bg-white border-y border-slate-200">
+        <section id="faq" className="scroll-mt-24 px-6 py-24 bg-slate-50">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
               <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">FAQ</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">The questions visitors ask before they decide.</h2>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Common questions, answered.</h2>
               <p className="mt-4 text-lg leading-8 text-slate-600">
-                A detailed landing page should answer the obvious objections before someone has to hunt for them.
+                Everything you need to know before getting started with LedgerLink.
               </p>
             </div>
 
             <div className="space-y-4">
               {faqItems.map((faq) => (
-                <details key={faq.question} className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm open:bg-white">
+                <details key={faq.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm open:bg-white">
                   <summary className="cursor-pointer list-none text-base font-semibold text-slate-950 marker:hidden">
                     {faq.question}
                   </summary>
@@ -451,39 +477,13 @@ export function Landing() {
           </div>
         </section>
 
-        <section id="sectors" className="scroll-mt-24 px-6 py-24 bg-slate-50">
-          <div className="mx-auto max-w-7xl">
-            <div className="max-w-3xl text-center mx-auto">
-              <Badge className="rounded-full border border-primary/15 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">Sectors</Badge>
-              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Tailored for the teams LedgerLink is meant to help.</h2>
-              <p className="mt-4 text-lg leading-8 text-slate-600">
-                The product feels more credible when it speaks directly to real operating contexts instead of generic accounting language.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {sectors.map((sector) => (
-                <Card key={sector.title} className="group border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                  <CardContent className="p-6">
-                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${sector.color}`}>
-                      <sector.icon className="h-7 w-7" />
-                    </div>
-                    <h3 className="mt-5 text-xl font-bold text-slate-950">{sector.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{sector.desc}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="px-6 pb-20">
           <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-200 bg-slate-950 px-8 py-10 text-white shadow-2xl shadow-slate-300/40 sm:px-10 lg:flex lg:items-center lg:justify-between">
             <div className="max-w-2xl">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Ready to get organized?</p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Start free now or contact us if you need a tailored setup.</h2>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Start free today, or talk to us about a setup that fits.</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300">
-                The final CTA should not stop the page. It should make the next step obvious for both self-serve users and enterprise buyers.
+                Jump straight into the demo with sample data, or reach out for a guided onboarding tailored to your organization's needs.
               </p>
             </div>
 
