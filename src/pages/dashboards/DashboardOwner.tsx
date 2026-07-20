@@ -14,7 +14,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CheckCircle, Activity, ArrowRight } from "lucide-react";
+import { Shield, ChevronLeft, ChevronRight, Plus, X, User, Receipt, FileText, CircleCheck as CheckCircle, Activity, ArrowRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -71,7 +71,7 @@ function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenC
       title: newEventTitle.trim(),
       date: selectedDate,
       type: "custom",
-      color: "bg-violet-500"
+      color: "bg-primary"
     }]);
     setNewEventTitle("");
     setShowAddEvent(false);
@@ -185,8 +185,8 @@ function CalendarDialog({ open, onOpenChange, events }: { open: boolean; onOpenC
           <div className="flex gap-4 mt-4 pt-3 border-t border-border">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-warning" /> Invoice Due</div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-success" /> Payroll</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Compliance</div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-violet-500" /> Custom</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-destructive" /> Compliance</div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> Custom</div>
           </div>
         </div>
       </DialogContent>
@@ -215,14 +215,14 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Total Invoiced (MTD)",
         arrearsLabel: "Unpaid School Fees",
-        complianceText: "Term fee collection deadline in 3 days ΓÇö follow up with parents who have outstanding balances",
+        complianceText: "Term fee collection deadline in 3 days — follow up with parents who have outstanding balances",
         extraCards: [],
       };
     case "Church":
       return {
         invoicedLabel: "Offerings & Pledges (MTD)",
         arrearsLabel: "Outstanding Pledges",
-        complianceText: "Annual financial statement filing deadline approaching ΓÇö ensure all offerings are reconciled",
+        complianceText: "Annual financial statement filing deadline approaching — ensure all offerings are reconciled",
         extraCards: [
           { label: "Trust/Building Fund Balance", value: "KES 1.8M" },
         ],
@@ -231,7 +231,7 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Total Billed (MTD)",
         arrearsLabel: "Outstanding Arrears",
-        complianceText: "LSK annual practising certificate renewal due ΓÇö ensure compliance filings are current",
+        complianceText: "LSK annual practising certificate renewal due — ensure compliance filings are current",
         extraCards: [
           { label: "Client Trust Account", value: "KES 5.2M", highlight: true },
         ],
@@ -240,7 +240,7 @@ function getSectorConfig(sector: string): SectorConfig {
       return {
         invoicedLabel: "Patient Billing (MTD)",
         arrearsLabel: "Outstanding Arrears",
-        complianceText: "NHIF remittance deadline in 3 days ΓÇö ensure all claims are submitted",
+        complianceText: "NHIF remittance deadline in 3 days — ensure all claims are submitted",
         extraCards: [],
       };
     default:
@@ -348,9 +348,9 @@ export function DashboardOwner() {
     });
 
     // Compliance: PAYE / NSSF / SHA on the 9th and 15th of each month
-    events.push({ id: "comp-paye-jul", title: "PAYE Filing Deadline", date: "2026-07-09", type: "compliance", color: "bg-red-500" });
-    events.push({ id: "comp-nssf-jul", title: "NSSF/SHA Remittance", date: "2026-07-15", type: "compliance", color: "bg-red-500" });
-    events.push({ id: "comp-vat-jul", title: "VAT Return Due", date: "2026-07-20", type: "compliance", color: "bg-red-500" });
+    events.push({ id: "comp-paye-jul", title: "PAYE Filing Deadline", date: "2026-07-09", type: "compliance", color: "bg-destructive" });
+    events.push({ id: "comp-nssf-jul", title: "NSSF/SHA Remittance", date: "2026-07-15", type: "compliance", color: "bg-destructive" });
+    events.push({ id: "comp-vat-jul", title: "VAT Return Due", date: "2026-07-20", type: "compliance", color: "bg-destructive" });
 
     return events;
   }, [invoices, payrollHistory]);
@@ -583,7 +583,7 @@ export function DashboardOwner() {
                   labelStyle={{ fontSize: '12px', color: 'hsl(var(--muted-foreground))', marginBottom: '4px' }}
                 />
                 <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="expenses" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#10b981', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="expenses" stroke="var(--color-success)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: 'var(--color-success)', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

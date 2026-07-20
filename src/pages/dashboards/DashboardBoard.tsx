@@ -119,7 +119,7 @@ export function DashboardBoard() {
                 labelStyle={{ fontSize: '14px', color: 'hsl(var(--muted-foreground))', marginBottom: '4px' }}
               />
               <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
-              <Line type="monotone" dataKey="expenses" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#10b981', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
+              <Line type="monotone" dataKey="expenses" stroke="var(--color-success)" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: 'var(--color-success)', stroke: 'hsl(var(--background))', strokeWidth: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

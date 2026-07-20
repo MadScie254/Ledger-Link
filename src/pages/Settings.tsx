@@ -326,7 +326,7 @@ export function Settings() {
                   variant={orgProfile.qbConnected ? "outline" : "default"} 
                   onClick={handleToggleQB}
                   disabled={isReadOnly}
-                  className={orgProfile.qbConnected ? "text-destructive hover:bg-destructive/10" : "bg-emerald-600 hover:bg-emerald-700"}
+                  className={orgProfile.qbConnected ? "text-destructive hover:bg-destructive/10" : "bg-success text-success-foreground hover:bg-success/90"}
                 >
                   {orgProfile.qbConnected ? 'Disconnect' : 'Connect'}
                 </Button>
@@ -437,7 +437,7 @@ export function Settings() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{member.role}</Badge>
-                      <Badge className={member.status === "Active" ? "bg-emerald-600" : "bg-amber-600"}>{member.status}</Badge>
+                      <Badge className={member.status === "Active" ? "bg-success text-success-foreground" : "bg-warning text-warning-foreground"}>{member.status}</Badge>
                     </div>
                   </div>
                 ))}

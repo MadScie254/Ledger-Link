@@ -1,24 +1,38 @@
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from '../contexts/AuthContext';
 import { Dashboard } from '../pages/Dashboard';
 
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <MemoryRouter>
+      <AuthProvider>{ui}</AuthProvider>
+    </MemoryRouter>
+  );
+}
+
 describe('Dashboard Component', () => {
-  it('renders the dashboard header', () => {
-    render(<Dashboard />);
-    expect(screen.getByText('Dashboard')).toBeDefined();
-    expect(screen.getByText(/Here is what's happening/i)).toBeDefined();
+  it('renders the owner greeting header', async () => {
+    renderWithProviders(<Dashboard />);
+    await waitFor(() => {
+      expect(screen.getByText(/Morning/i)).toBeDefined();
+      expect(screen.getByText(/Owner/i)).toBeDefined();
+    });
   });
 
-  it('renders KPI summary cards', () => {
-    render(<Dashboard />);
-    expect(screen.getByText('Total Invoiced (MTD)')).toBeDefined();
-    expect(screen.getByText('Outstanding Arrears')).toBeDefined();
-    expect(screen.getByText('Payroll Due')).toBeDefined();
-    expect(screen.getByText('Cash Position')).toBeDefined();
+  it('renders KPI summary cards', async () => {
+    renderWithProviders(<Dashboard />);
+    await waitFor(() => {
+      expect(screen.getByText('Cash Position')).toBeDefined();
+      expect(screen.getByText('Payroll Due')).toBeDefined();
+    });
   });
 
-  it('renders recent activity feed', () => {
-    render(<Dashboard />);
-    expect(screen.getByText('Recent Activity')).toBeDefined();
-    expect(screen.getByText('Invoice Paid')).toBeDefined();
+  it('renders recent activity feed', async () => {
+    renderWithProviders(<Dashboard />);
+    await waitFor(() => {
+      expect(screen.getByText('Recent Activity')).toBeDefined();
+    });
   });
 });

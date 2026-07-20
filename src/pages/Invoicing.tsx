@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Download, MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare, FileText, Repeat } from "lucide-react";
+import { Download, MoveHorizontal as MoreHorizontal, ArrowUpDown, Smartphone, Plus, Eye, Bell, CircleCheck as CheckCircle2, FileDown, Trash2, Clock, Mail, MessageSquare, FileText, Repeat } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useAppStore, type Invoice, type InvoiceLineItem } from "@/store/useAppStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,7 +78,7 @@ function InvoicingSkeleton() {
 const emptyLineItem: InvoiceLineItem = { description: "", qty: 1, unitPrice: 0 };
 
 function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { addInvoice, customers, addCustomer } = useAppStore();
+  const { addInvoice, customers, addCustomer, updateInvoice } = useAppStore();
 
   const [clientId, setClientId] = useState("");
   const [isNewClientMode, setIsNewClientMode] = useState(false);
@@ -147,6 +147,7 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
       });
       
       createInvoiceCall(nextId);
+      return;
     } else {
       if (!clientId) { toast.error("Please select a client."); return; }
       if (!client.trim()) { toast.error("Client name snapshot is required."); return; }
@@ -550,13 +551,20 @@ export function Invoicing() {
       lineItems: template.lineItems,
       taxRate: template.taxRate,
       notes: template.notes,
-      // intentionally omit recurring here so the generated invoice is normal
     };
     
     addInvoice(newInvoiceParams);
     
-    // Optional logic to advance template date could go here if we were persisting templates differently,
-    // but in this demo, adding a new invoice is sufficient to prove the workflow.
+    // Advance the template's next generation date based on its frequency
+    const currentNext = template.recurring.nextDate ? new Date(template.recurring.nextDate) : new Date();
+    const freq = template.recurring.frequency;
+    const advanced = new Date(currentNext);
+    if (freq === "Weekly") advanced.setDate(advanced.getDate() + 7);
+    else if (freq === "Monthly") advanced.setMonth(advanced.getMonth() + 1);
+    else if (freq === "Termly") advanced.setMonth(advanced.getMonth() + 4);
+    const advancedStr = advanced.toISOString().split("T")[0];
+    updateInvoice(template.id, { recurring: { ...template.recurring, nextDate: advancedStr } });
+    
     toast.success("Recurring invoice generated successfully.");
   };
 

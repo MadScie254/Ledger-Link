@@ -92,7 +92,7 @@ export function Reports() {
 
     const taxableInvoices = paidInvoices.filter((inv) => inv.taxRate === 16);
     const vatCollectedValue = taxableInvoices.reduce((sum, inv) => sum + (inv.rawAmount - inv.rawAmount / 1.16), 0);
-    const vatPaidValue = paidBills.reduce((sum, bill) => sum + (bill.amount * 0.16), 0);
+    const vatPaidValue = paidBills.reduce((sum, bill) => sum + (bill.amount - bill.amount / 1.16), 0);
     const netVatValue = vatCollectedValue - vatPaidValue;
 
     const kraRows = [
@@ -104,8 +104,8 @@ export function Reports() {
     ];
 
     const cData = [
-      { name: "Income", value: tIncome, color: "#10b981" },
-      { name: "Expenses", value: tExpense, color: "#f43f5e" }
+      { name: "Income", value: tIncome, color: "var(--color-success)" },
+      { name: "Expenses", value: tExpense, color: "var(--color-destructive)" }
     ];
 
     return {
@@ -253,15 +253,15 @@ export function Reports() {
               <div className="space-y-3">
                 <div className="rounded-lg border border-border bg-muted/20 p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">VAT Collected</p>
-                  <p className="text-2xl font-bold text-emerald-600">KES {vatCollected.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-success">KES {vatCollected.toLocaleString()}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-muted/20 p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">VAT Paid</p>
-                  <p className="text-2xl font-bold text-sky-600">KES {vatPaid.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-primary">KES {vatPaid.toLocaleString()}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-muted/20 p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Net Position</p>
-                  <p className={`text-2xl font-bold ${netVat >= 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                  <p className={`text-2xl font-bold ${netVat >= 0 ? "text-destructive" : "text-success"}`}>
                     KES {Math.abs(netVat).toLocaleString()} {netVat >= 0 ? "Payable" : "Refundable"}
                   </p>
                 </div>
@@ -289,7 +289,7 @@ export function Reports() {
                       <TableCell className="font-medium">{row.label}</TableCell>
                       <TableCell className="text-right">KES {row.value.toLocaleString()}</TableCell>
                       <TableCell className="text-right w-[140px]">
-                        {row.kind === "payable" ? <Badge className="bg-rose-600">Payable</Badge> : row.kind === "refund" ? <Badge className="bg-emerald-600">Refundable</Badge> : <Badge variant="secondary">KRA Line</Badge>}
+                        {row.kind === "payable" ? <Badge className="bg-destructive text-destructive-foreground">Payable</Badge> : row.kind === "refund" ? <Badge className="bg-success text-success-foreground">Refundable</Badge> : <Badge variant="secondary">KRA Line</Badge>}
                       </TableCell>
                     </TableRow>
                   ))}

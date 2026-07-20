@@ -113,6 +113,7 @@ interface AppState {
   invoices: Invoice[];
   setInvoices: (invoices: Invoice[]) => void;
   updateInvoiceStatus: (id: string, status: string) => void;
+  updateInvoice: (id: string, updates: Partial<Invoice>) => void;
   addInvoice: (invoice: Omit<Invoice, "id" | "amount" | "rawAmount" | "status" | "reminders">) => void;
   addReminder: (id: string, method: "Email" | "SMS") => void;
 
@@ -269,6 +270,12 @@ export const useAppStore = create<AppState>()(
           }
           return newState;
         }),
+      updateInvoice: (id, updates) =>
+        set((state) => ({
+          invoices: state.invoices.map((inv) =>
+            inv.id === id ? { ...inv, ...updates } : inv
+          ),
+        })),
       addInvoice: (invoice) => 
         set((state) => {
           const lastNum = state.invoices.length;
