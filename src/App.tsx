@@ -17,9 +17,17 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { Routes, Route } from "react-router-dom";
+import { useAppStore } from "@/store/useAppStore";
+import { useEffect } from "react";
 
 function MainApp() {
   const { isOnboarded } = useAuth();
+  const loadAll = useAppStore((s) => s.loadAll);
+
+  useEffect(() => {
+    if (isOnboarded) loadAll();
+  }, [isOnboarded, loadAll]);
+
   if (!isOnboarded) return <Onboarding />;
   return <AppLayout />;
 }
